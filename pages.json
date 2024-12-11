@@ -1,0 +1,44 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "uni-app"
+			}
+		},
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		}
+	],
+	"tabBar": {
+		"borderStyle": "white",
+		"color": "#4D1F00",
+		"selectedColor": "#D2781F",
+		"spacing": "2px",
+		"height": "42px",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "首页",
+				"iconPath": "/static/tab-index-icon.png",
+				"selectedIconPath": "/static/tab-index-selected-icon.png"
+			},
+			{
+				"pagePath": "pages/visual/index",
+				"text": "库存",
+				"iconPath": "/static/tab-visual-icon.png",
+				"selectedIconPath": "/static/tab-visual-selected-icon.png"
+			}
+		]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"uniIdRouter": {}
+}
