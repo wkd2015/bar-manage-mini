@@ -3,11 +3,11 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationStyle": "custom"
 			}
 		},
 		{
-			"path": "pages/index/index",
+			"path": "pages/stock/index",
 			"style": {
 				"navigationStyle": "custom"
 			}
@@ -22,15 +22,15 @@
 		"list": [
 			{
 				"pagePath": "pages/index/index",
-				"text": "首页",
-				"iconPath": "/static/tab-index-icon.png",
-				"selectedIconPath": "/static/tab-index-selected-icon.png"
+				"text": "首页"
+				// "iconPath": "/static/tab-index-icon.png",
+				// "selectedIconPath": "/static/tab-index-selected-icon.png"
 			},
 			{
-				"pagePath": "pages/visual/index",
-				"text": "库存",
-				"iconPath": "/static/tab-visual-icon.png",
-				"selectedIconPath": "/static/tab-visual-selected-icon.png"
+				"pagePath": "pages/stock/index",
+				"text": "库存"
+				// "iconPath": "/static/tab-visual-icon.png",
+				// "selectedIconPath": "/static/tab-visual-selected-icon.png"
 			}
 		]
 	},
