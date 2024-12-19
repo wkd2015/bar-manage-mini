@@ -1,15 +1,37 @@
-<script>
-	export default {
-		onLaunch: function() {
-			console.log('App Launch')
-		},
-		onShow: function() {
-			console.log('App Show')
-		},
-		onHide: function() {
-			console.log('App Hide')
-		}
-	}
+<script setup>
+import { useStore } from 'vuex'
+import { onLaunch, onShow, onHide } from '@dcloudio/uni-app'
+
+const store = useStore()
+
+const setNavbarInfoStore = (info) => store.dispatch('setNavbarInfo', info)
+
+// Set Navbar Function
+function getNavBarInfo() {
+	const systemInfo = wx.getSystemInfoSync()
+	const menuButtonInfo = wx.getMenuButtonBoundingClientRect()
+	const statusBarHeight = systemInfo.statusBarHeight
+	const navHeight = menuButtonInfo.height + (menuButtonInfo.top - systemInfo.statusBarHeight) * 2
+	const barHeight = navHeight + statusBarHeight
+	setNavbarInfoStore({
+		statusBarHeight,
+		navHeight,
+		barHeight
+	})
+}
+
+onLaunch(() => {
+	console.log('App Launch')
+	getNavBarInfo()
+})
+
+onShow(() => {
+	console.log('App Show')
+})
+
+onHide(() => {
+	console.log('App Hide')
+})
 </script>
 
 <style>

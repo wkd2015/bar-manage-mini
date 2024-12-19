@@ -1,12 +1,6 @@
 <template>
-  <view class="container">
-    <!-- 导航栏 -->
-    <uni-nav-bar
-      title="库存管理"
-      :fixed="true"
-      status-bar
-      background-color="#ffffff"
-    />
+  <view class="container" :style="`padding-top: ${navbarInfo.barHeight}px;`">
+    <navbar title="库存管理" class="navbar"></navbar>
 
     <!-- 搜索栏 -->
     <view class="search-box">
@@ -20,8 +14,8 @@
 
     <!-- 标签栏 -->
     <view class="tabs">
-      <view 
-        v-for="(tab, index) in tabs" 
+      <view
+        v-for="(tab, index) in tabs"
         :key="index"
         :class="['tab-item', { active: currentTab === index }]"
         @tap="switchTab(index)"
@@ -31,20 +25,24 @@
     </view>
 
     <!-- 商品列表 -->
-    <scroll-view 
-      scroll-y 
-      class="product-list"
-      @scrolltolower="loadMore"
-    >
-      <uni-swipe-action>
-        <uni-swipe-action-item
+    <scroll-view scroll-y class="product-list" @scrolltolower="loadMore">
+      <!-- <uni-swipe-action> -->
+      <!-- <uni-swipe-action-item
           v-for="item in filteredProducts"
           :key="item.id"
           :left-options="leftOptions"
           :right-options="rightOptions"
           @click="handleSwipeClick($event, item)"
-        >
-          <view class="product-card">
+        > -->
+      <product-card
+        v-for="item in filteredProducts"
+        :key="item.id"
+        :product="item"
+        :min-stock="5"
+        :current-tab="currentTab"
+        @swipe="handleProductSwipe"
+      />
+      <!-- <view class="product-card">
             <view class="product-main">
               <text class="product-name">{{ item.name }}</text>
               <text :class="['product-status', item.status === '已开封' ? 'opened' : '']">
@@ -55,9 +53,9 @@
               <text class="product-quantity">库存: {{ item.quantity }}</text>
               <text class="product-time">{{ item.updateTime }}</text>
             </view>
-          </view>
-        </uni-swipe-action-item>
-      </uni-swipe-action>
+          </view> -->
+      <!-- </uni-swipe-action-item> -->
+      <!-- </uni-swipe-action> -->
     </scroll-view>
 
     <!-- 底部操作按钮 -->
@@ -67,14 +65,14 @@
     </view>
 
     <!-- 入库操作 ActionSheet -->
-    <uni-popup ref="inStockActionPopup" type="bottom">
+    <uni-popup ref="inStockActionPopup" type="bottom" :safe-area="false">
       <view class="action-sheet">
         <view class="action-sheet-header">
           <text class="action-sheet-title">选择商品</text>
           <button class="btn-add" @tap="showAddProduct">新增商品</button>
         </view>
         <scroll-view scroll-y class="action-sheet-content">
-          <view 
+          <view
             class="action-sheet-item"
             v-for="item in products"
             :key="item.id"
@@ -88,13 +86,13 @@
     </uni-popup>
 
     <!-- 出库操作 ActionSheet -->
-    <uni-popup ref="outStockActionPopup" type="bottom">
+    <uni-popup ref="outStockActionPopup" type="bottom" :safe-area="false">
       <view class="action-sheet">
         <view class="action-sheet-header">
           <text class="action-sheet-title">选择操作商品</text>
         </view>
         <scroll-view scroll-y class="action-sheet-content">
-          <view 
+          <view
             class="action-sheet-item"
             v-for="item in products"
             :key="item.id"
@@ -104,14 +102,14 @@
               <text class="item-quantity">当前库存: {{ item.quantity }}</text>
             </view>
             <view class="item-actions">
-              <button 
+              <!-- <button
                 class="btn-small"
                 :disabled="item.status === '已开封'"
                 @tap="handleOpen(item)"
               >
                 开封
-              </button>
-              <button 
+              </button> -->
+              <button
                 class="btn-small btn-danger"
                 @tap="showQuantityInput(item)"
               >
@@ -127,7 +125,7 @@
     <uni-popup ref="addProductPopup" type="center">
       <view class="popup-content">
         <view class="popup-title">新增商品</view>
-        <uni-forms :model="newProductForm" :rules="rules" ref="newProductForm">
+        <uni-forms :model="newProductForm" :rules="rules" ref="newProductFormRef">
           <uni-forms-item label="商品名称" name="name">
             <uni-easyinput
               v-model="newProductForm.name"
@@ -135,10 +133,7 @@
             />
           </uni-forms-item>
           <uni-forms-item label="初始库存" name="quantity">
-            <uni-number-box
-              v-model="newProductForm.quantity"
-              :min="0"
-            />
+            <uni-number-box v-model="newProductForm.quantity" :min="0" />
           </uni-forms-item>
           <uni-forms-item label="商品类型" name="category">
             <uni-data-select
@@ -160,11 +155,33 @@
       </view>
     </uni-popup>
 
+    <!-- 在其他弹窗后面添加开封数量弹窗 -->
+    <uni-popup ref="openPopup" type="center">
+      <view class="popup-content">
+        <view class="popup-title">开封数量</view>
+        <view class="quantity-input">
+          <uni-number-box
+            v-model="openQuantity"
+            :min="1"
+            :max="selectedProduct?.quantity || 999"
+          />
+        </view>
+        <view class="popup-buttons">
+          <button class="btn-cancel" @tap="closeOpenPopup">取消</button>
+          <button class="btn-confirm" @tap="confirmOpen">确认</button>
+        </view>
+      </view>
+    </uni-popup>
+
     <!-- 新增类型弹窗 -->
     <uni-popup ref="addCategoryPopup" type="center">
       <view class="popup-content">
         <view class="popup-title">新增商品类型</view>
-        <uni-forms :model="newCategoryForm" :rules="categoryRules" ref="newCategoryForm">
+        <uni-forms
+          :model="newCategoryForm"
+          :rules="categoryRules"
+          ref="newCategoryForm"
+        >
           <uni-forms-item label="类型名称" name="name">
             <uni-easyinput
               v-model="newCategoryForm.name"
@@ -182,7 +199,7 @@
     <!-- 数量输入弹窗 -->
     <uni-popup ref="quantityPopup" type="center">
       <view class="popup-content">
-        <view class="popup-title">{{ isInStock ? '入库' : '出库' }}数量</view>
+        <view class="popup-title">{{ isInStock ? "入库" : "出库" }}数量</view>
         <view class="quantity-input">
           <uni-number-box
             v-model="operationQuantity"
@@ -192,7 +209,9 @@
         </view>
         <view class="popup-buttons">
           <button class="btn-cancel" @tap="closeQuantityPopup">取消</button>
-          <button class="btn-confirm" @tap="confirmQuantityOperation">确认</button>
+          <button class="btn-confirm" @tap="confirmQuantityOperation">
+            确认
+          </button>
         </view>
       </view>
     </uni-popup>
@@ -200,186 +219,248 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
+
+const store = useStore();
+const navbarInfo = computed(() => store.getters.navbarInfo);
 
 // 状态管理
-const searchText = ref('')
-const currentTab = ref(0)
-const tabs = ['全部', '未开封', '已开封']
+const searchText = ref("");
+const currentTab = ref(0);
+const tabs = ["全部", "未开封", "已开封"];
 
 // 弹窗引用
-const inStockActionPopup = ref(null)
-const outStockActionPopup = ref(null)
-const addProductPopup = ref(null)
-const addCategoryPopup = ref(null)
-const quantityPopup = ref(null)
+const inStockActionPopup = ref(null);
+const outStockActionPopup = ref(null);
+const addProductPopup = ref(null);
+const addCategoryPopup = ref(null);
+const quantityPopup = ref(null);
+const openPopup = ref(null)
+const openQuantity = ref(1)
+
+// 修改商品滑动处理方法
+const handleProductSwipe = ({ action, product }) => {
+  selectedProduct.value = product
+  if (action === 'out') {
+    isInStock.value = false
+    quantityPopup.value.open()
+  } else if (action === 'open') {
+    openPopup.value.open()
+  }
+}
+
+const handleCategoryChange = (e) => {
+  // selectedCategory.value = e.detail.value
+}
+
+// 添加开封相关方法
+const closeOpenPopup = () => {
+  openPopup.value.close()
+  openQuantity.value = 1
+}
+
+const confirmOpen = () => {
+  if (!selectedProduct.value) return
+  
+  const index = products.value.findIndex(item => item.id === selectedProduct.value.id)
+  if (index !== -1) {
+    // 检查开封数量是否合法
+    if (openQuantity.value > products.value[index].quantity) {
+      uni.showToast({
+        title: '开封数量不能大于库存',
+        icon: 'none'
+      })
+      return
+    }
+    
+    // 更新商品状态和开封数量
+    products.value[index].status = '已开封'
+    products.value[index].openedQuantity = (products.value[index].openedQuantity || 0) + openQuantity.value
+    products.value[index].updateTime = formatTime(new Date())
+  }
+  
+  closeOpenPopup()
+  uni.showToast({
+    title: '开封成功',
+    icon: 'success'
+  })
+}
 
 // 商品数据
 const products = ref([
   {
     id: 1,
-    name: '五粮液',
+    name: "五粮液",
     quantity: 10,
-    status: '未开封',
-    category: '白酒',
-    updateTime: '12-12 14:30'
+    status: "未开封",
+    category: "白酒",
+    updateTime: "12-12 14:30",
   },
   {
     id: 2,
-    name: '茅台',
+    name: "茅台",
     quantity: 5,
-    status: '已开封',
-    category: '白酒',
-    updateTime: '12-12 13:20'
-  }
-])
+    status: "已开封",
+    category: "白酒",
+    updateTime: "12-12 13:20",
+  },
+]);
 
 // 商品类型
 const categories = ref([
-  { value: '白酒', text: '白酒' },
-  { value: '红酒', text: '红酒' },
-  { value: '啤酒', text: '啤酒' }
-])
+  { value: "白酒", text: "白酒" },
+  { value: "红酒", text: "红酒" },
+  { value: "啤酒", text: "啤酒" },
+]);
 
 // 表单数据
 const newProductForm = ref({
-  name: '',
+  name: "",
   quantity: 0,
-  category: ''
-})
+  category: "",
+});
+const newProductFormRef = ref(null)
 
 const newCategoryForm = ref({
-  name: ''
-})
+  name: "",
+});
 
 // 操作相关
-const selectedProduct = ref(null)
-const operationQuantity = ref(1)
-const isInStock = ref(true)
+const selectedProduct = ref(null);
+const operationQuantity = ref(1);
+const isInStock = ref(true);
 
 // 滑动操作配置
 const leftOptions = [
   {
-    text: '入库',
+    text: "入库",
     style: {
-      backgroundColor: '#007aff'
-    }
-  }
-]
+      backgroundColor: "#007aff",
+    },
+  },
+];
 
 const rightOptions = [
   {
-    text: '出库',
+    text: "出库",
     style: {
-      backgroundColor: '#dd524d'
-    }
-  }
-]
+      backgroundColor: "#dd524d",
+    },
+  },
+];
 
 // 表单验证规则
 const rules = {
   name: {
-    rules: [
-      { required: true, errorMessage: '请输入商品名称' }
-    ]
+    rules: [{ required: true, errorMessage: "请输入商品名称" }],
   },
   category: {
-    rules: [
-      { required: true, errorMessage: '请选择商品类型' }
-    ]
-  }
-}
+    rules: [{ required: true, errorMessage: "请选择商品类型" }],
+  },
+};
 
 const categoryRules = {
   name: {
-    rules: [
-      { required: true, errorMessage: '请输入类型名称' }
-    ]
-  }
-}
+    rules: [{ required: true, errorMessage: "请输入类型名称" }],
+  },
+};
 
 // 计算属性：过滤后的商品列表
 const filteredProducts = computed(() => {
-  let result = [...products.value]
-  
+  let result = [...products.value];
+
   if (searchText.value) {
-    result = result.filter(item => 
+    result = result.filter((item) =>
       item.name.toLowerCase().includes(searchText.value.toLowerCase())
-    )
+    );
   }
-  
+
   if (currentTab.value !== 0) {
-    const status = currentTab.value === 1 ? '未开封' : '已开封'
-    result = result.filter(item => item.status === status)
+    const status = currentTab.value === 1 ? "未开封" : "已开封";
+    result = result.filter((item) => item.status === status);
   }
-  
-  return result
-})
+
+  return result;
+});
 
 // 方法
 const switchTab = (index) => {
-  currentTab.value = index
-}
+  currentTab.value = index;
+};
 
 const showInStockAction = () => {
-  inStockActionPopup.value.open()
-  isInStock.value = true
-}
+  inStockActionPopup.value.open();
+  isInStock.value = true;
+};
 
 const showOutStockAction = () => {
-  outStockActionPopup.value.open()
-  isInStock.value = false
-}
+  outStockActionPopup.value.open();
+  isInStock.value = false;
+};
 
 const handleSwipeClick = (e, item) => {
-  selectedProduct.value = item
+  selectedProduct.value = item;
   if (e.index === 0) {
-    isInStock.value = true
-    quantityPopup.value.open()
+    isInStock.value = true;
+    quantityPopup.value.open();
   } else {
-    isInStock.value = false
-    quantityPopup.value.open()
+    isInStock.value = false;
+    quantityPopup.value.open();
   }
-}
+};
 
 const showAddProduct = () => {
-  inStockActionPopup.value.close()
-  addProductPopup.value.open()
-}
+  inStockActionPopup.value.close();
+  addProductPopup.value.open();
+};
 
 const showAddCategory = () => {
-  addCategoryPopup.value.open()
-}
+  addCategoryPopup.value.open();
+};
 
 const selectProductForInStock = (product) => {
-  selectedProduct.value = product
-  isInStock.value = true
-  inStockActionPopup.value.close()
-  quantityPopup.value.open()
-}
+  selectedProduct.value = product;
+  isInStock.value = true;
+  inStockActionPopup.value.close();
+  quantityPopup.value.open();
+};
 
 const handleOpen = (product) => {
   // 实现开封逻辑
-  const index = products.value.findIndex(item => item.id === product.id)
+  const index = products.value.findIndex((item) => item.id === product.id);
   if (index !== -1) {
-    products.value[index].status = '已开封'
+    products.value[index].status = "已开封";
   }
   uni.showToast({
-    title: '已开封',
-    icon: 'success'
-  })
-}
+    title: "已开封",
+    icon: "success",
+  });
+};
+
+const closeQuantityPopup = () => {
+  quantityPopup.value.close();
+};
 
 const confirmQuantityOperation = () => {
-  if (!selectedProduct.value) return
-  
-  const index = products.value.findIndex(item => item.id === selectedProduct.value.id)
+  if (!selectedProduct.value) return;
+
+  const index = products.value.findIndex(
+    (item) => item.id === selectedProduct.value.id
+  );
   if (index !== -1) {
     if (isInStock.value) {
-      products.value[index].quantity += operationQuantity.value
+      products.value[index].quantity += operationQuantity.value;
     } else {
       if (products.value[index].quantity >= operationQuantity.value) {
         products.value[index].quantity -= operationQuantity.value
+        // 如果是已开封状态,优先减少已开封数量
+        if (products.value[index].status === '已开封') {
+          products.value[index].openedQuantity = Math.max(
+            0, 
+            (products.value[index].openedQuantity || 0) - operationQuantity.value
+          )
+        }
       } else {
         uni.showToast({
           title: '库存不足',
@@ -388,67 +469,76 @@ const confirmQuantityOperation = () => {
         return
       }
     }
-    products.value[index].updateTime = formatTime(new Date())
+    products.value[index].updateTime = formatTime(new Date());
   }
-  
-  quantityPopup.value.close()
+
+  closeQuantityPopup();
   uni.showToast({
-    title: isInStock.value ? '入库成功' : '出库成功',
-    icon: 'success'
-  })
-}
+    title: isInStock.value ? "入库成功" : "出库成功",
+    icon: "success",
+  });
+};
+
+const closeAddProduct = () => {
+  addProductPopup.value.close();
+};
 
 const confirmAddProduct = async () => {
   try {
-    await newProductForm.value.validate()
+    await newProductFormRef.value.validate();
     products.value.push({
       id: products.value.length + 1,
       ...newProductForm.value,
-      status: '未开封',
-      updateTime: formatTime(new Date())
-    })
-    addProductPopup.value.close()
+      status: "未开封",
+      updateTime: formatTime(new Date()),
+    });
+    closeAddProduct();
     uni.showToast({
-      title: '添加成功',
-      icon: 'success'
-    })
+      title: "添加成功",
+      icon: "success",
+    });
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
-}
+};
+
+const closeAddCategory = () => {
+  addCategoryPopup.value.close();
+};
 
 const confirmAddCategory = async () => {
   try {
-    await newCategoryForm.value.validate()
+    await newCategoryForm.value.validate();
     categories.value.push({
       value: newCategoryForm.value.name,
-      text: newCategoryForm.value.name
-    })
-    addCategoryPopup.value.close()
+      text: newCategoryForm.value.name,
+    });
+    closeAddCategory();
     uni.showToast({
-      title: '添加成功',
-      icon: 'success'
-    })
+      title: "添加成功",
+      icon: "success",
+    });
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
-}
+};
 
 // 工具函数
 const formatTime = (date) => {
-  const mm = (date.getMonth() + 1).toString().padStart(2, '0')
-  const dd = date.getDate().toString().padStart(2, '0')
-  const hh = date.getHours().toString().padStart(2, '0')
-  const mi = date.getMinutes().toString().padStart(2, '0')
-  return `${mm}-${dd} ${hh}:${mi}`
-}
+  const mm = (date.getMonth() + 1).toString().padStart(2, "0");
+  const dd = date.getDate().toString().padStart(2, "0");
+  const hh = date.getHours().toString().padStart(2, "0");
+  const mi = date.getMinutes().toString().padStart(2, "0");
+  return `${mm}-${dd} ${hh}:${mi}`;
+};
 </script>
 
 <style>
 .container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
+  box-sizing: border-box;
   background-color: #f5f5f5;
 }
 
@@ -479,7 +569,7 @@ const formatTime = (date) => {
 }
 
 .tab-item.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 25%;
@@ -491,6 +581,7 @@ const formatTime = (date) => {
 .product-list {
   flex: 1;
   padding: 10px;
+  box-sizing: border-box;
 }
 
 .product-card {

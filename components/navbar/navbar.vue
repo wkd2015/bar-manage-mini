@@ -1,7 +1,6 @@
 <script setup>
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { imgBaseUrl } from '../../config'
 // TODO: 抽取Hook。https://ask.dcloud.net.cn/question/180260
 
 const store = useStore()
@@ -29,7 +28,7 @@ const props = defineProps({
 	},
 	navBackIcon: {
 		type: String,
-		default: imgBaseUrl + 'nav/nav-bar-back-icon.svg'
+		default: '../static/imgs/nav-back.png'
 	}
 })
 const navbarBackIcon = computed(() => {
