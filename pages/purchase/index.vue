@@ -15,6 +15,12 @@ const contentText = ref({
 	contentnomore: '没有更多数据了'
 })
 const navbarInfo = computed(() => store.getters.navbarInfo);
+
+const onPurchaseCreate = () => {
+  uni.navigateTo({
+    url: "/pages/purchase/form",
+  });
+};
 </script>
 
 <template>
@@ -28,6 +34,11 @@ const navbarInfo = computed(() => store.getters.navbarInfo);
         <uni-load-more :status="loadStatus" :content-text="contentText" />
       </scroll-view>
     </view>
+    <uni-fab
+      horizontal="right"
+      vertical="bottom"
+      @fab-click="onPurchaseCreate"
+    />
   </view>
 </template>
 
