@@ -17,6 +17,12 @@
 			"style": {
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/purchase/form",
+			"style": {
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"tabBar": {
@@ -37,6 +43,12 @@
 				"text": "库存"
 				// "iconPath": "/static/tab-visual-icon.png",
 				// "selectedIconPath": "/static/tab-visual-selected-icon.png"
+			},
+			{
+				"pagePath": "pages/purchase/index",
+				"text": "我的"
+				// "iconPath": "/static/tab-data-icon.png",
+				// "selectedIconPath": "/static/tab-data-selected-icon.png"
 			}
 		]
 	},
