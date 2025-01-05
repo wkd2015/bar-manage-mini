@@ -8,8 +8,7 @@ const navbarInfo = computed(() => store.getters.navbarInfo);
 
 <template>
   <view class="container" :style="`padding-top: ${navbarInfo.barHeight}px;`">
-    <navbar title="采购" class="navbar"></navbar>
-    
+    <navbar title="新建采购" class="navbar"></navbar>
   </view>
 </template>
 
