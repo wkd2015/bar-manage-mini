@@ -54,11 +54,9 @@ const onGoodsSelectedChange = (list) => {
     <view class="supplier-popup">
       <uni-popup ref="supplierPopup" type="bottom" :safe-area="false"> </uni-popup>
     </view>
-    <uni-popup ref="goodsPopup" type="bottom" :safe-area="false">
-      <view class="action-sheet" :style="{
-        height: `calc(100vh - ${navbarInfo.barHeight}px)`,
-      }">
-        <view class="action-sheet-header">
+    <uni-popup ref="goodsPopup" type="right" :safe-area="false">
+      <view class="action-sheet" :style="`padding-top: ${navbarInfo.statusBarHeight}px;`">
+        <view class="action-sheet-header" :style="`margin-right: ${navbarInfo.menuButtonWidth}px; height: ${navbarInfo.navHeight}px;`">
           <text class="action-sheet-title">选择商品</text>
           <view class="action-sheet-add-btn">添加</view>
         </view>
@@ -66,6 +64,7 @@ const onGoodsSelectedChange = (list) => {
           <GoodsList :goodsList="goodsList" @select-goods="onGoodsSelectedChange" />
         </view>
         <view class="action-sheet-footer">
+          <!-- TODO: 点击弹出已选商品 -->
           <uni-badge size="small" :text="selectedGoodsList.length" absolute="rightTop" type="primary">
             <uni-icons type="cart" size="24" />
           </uni-badge>
@@ -168,6 +167,8 @@ const onGoodsSelectedChange = (list) => {
   border-radius: 10px 10px 0 0;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  z-index: 999;
 }
 
 .action-sheet-header {

@@ -13,10 +13,12 @@ function getNavBarInfo() {
 	const statusBarHeight = systemInfo.statusBarHeight
 	const navHeight = menuButtonInfo.height + (menuButtonInfo.top - systemInfo.statusBarHeight) * 2
 	const barHeight = navHeight + statusBarHeight
+	const menuButtonWidth = menuButtonInfo.width + (systemInfo.screenWidth - menuButtonInfo.right) * 2
 	setNavbarInfoStore({
 		statusBarHeight,
 		navHeight,
-		barHeight
+		barHeight,
+		menuButtonWidth
 	})
 }
 

@@ -5,7 +5,8 @@ const store = createStore({
 		navbarInfo: {
 			statusBarHeight: 0,
 			navHeight: 0,
-			barHeight: 0
+			barHeight: 0,
+			menuButtonWidth: 0
 		}
 	},
 	mutations: {

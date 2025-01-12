@@ -65,7 +65,7 @@ const navbarInfo = computed(() => store.getters.navbarInfo)
 	width: 100%;
 	position: fixed;
 	top: 0;
-	z-index: 999;
+	z-index: 99;
 
 	&-back {
 		width: 24px;
