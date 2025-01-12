@@ -87,3 +87,34 @@ export const mockPurchaseList = [
     createTime: "2019-12-12 12:12:12",
   },
 ];
+
+export const mockGoodsList = [
+  {
+    id: "1",
+    name: "白兰地",
+    referencePrice: 100,
+    thumbnail: mockPic,
+    unit: "瓶",
+  },
+  {
+    id: "2",
+    name: "威士忌",
+    referencePrice: 90,
+    thumbnail: mockPic,
+    unit: "瓶",
+  },
+  {
+    id: "3",
+    name: "啤酒",
+    referencePrice: 10,
+    thumbnail: mockPic,
+    unit: "瓶",
+  },
+  {
+    id: "4",
+    name: "伏特加",
+    referencePrice: 90,
+    thumbnail: mockPic,
+    unit: "瓶",
+  },
+];

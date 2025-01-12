@@ -1,16 +1,23 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
+import GoodsList from "../goods/components/goods-list/index.vue";
+import { mockGoodsList } from "../../services/mock";
 
 const store = useStore();
 const navbarInfo = computed(() => store.getters.navbarInfo);
 
 const orderDateTime = ref("");
 const goodsPopup = ref(null);
+const goodsList = ref(mockGoodsList);
+const selectedGoodsList = ref([]);
 
 const onSupplierSelect = () => {};
 const onGoodsSelect = () => {
   goodsPopup.value.open("bottom");
+};
+const onGoodsSelectedChange = (list) => {
+  selectedGoodsList.value = list;
 };
 </script>
 
@@ -48,13 +55,20 @@ const onGoodsSelect = () => {
       <uni-popup ref="supplierPopup" type="bottom" :safe-area="false"> </uni-popup>
     </view>
     <uni-popup ref="goodsPopup" type="bottom" :safe-area="false">
-      <view class="action-sheet">
+      <view class="action-sheet" :style="{
+        height: `calc(100vh - ${navbarInfo.barHeight}px)`,
+      }">
         <view class="action-sheet-header">
           <text class="action-sheet-title">选择商品</text>
           <view class="action-sheet-add-btn">添加</view>
         </view>
-        <view class="action-sheet-content"></view>
+        <view class="action-sheet-content">
+          <GoodsList :goodsList="goodsList" @select-goods="onGoodsSelectedChange" />
+        </view>
         <view class="action-sheet-footer">
+          <uni-badge size="small" :text="selectedGoodsList.length" absolute="rightTop" type="primary">
+            <uni-icons type="cart" size="24" />
+          </uni-badge>
           <view
           class="action-sheet-confirm"
             @click=""
@@ -148,8 +162,8 @@ const onGoodsSelect = () => {
 }
 
 .action-sheet {
-  padding: 12px 12px env(safe-area-inset-bottom) 12px;
-  height: 80vh;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-sizing: border-box;
   background-color: #fff;
   border-radius: 10px 10px 0 0;
   display: flex;
@@ -160,7 +174,7 @@ const onGoodsSelect = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 12px;
+  padding: 12px;
   border-bottom: 0.5px solid #eee;
 }
 
@@ -182,6 +196,7 @@ const onGoodsSelect = () => {
   flex: 1;
   flex-direction: column;
   gap: 10px;
+  background-color: #f5f5f5;
 }
 
 .action-sheet-footer {
@@ -190,6 +205,7 @@ const onGoodsSelect = () => {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
+  padding: 0 12px;
 }
 
 .action-sheet-confirm {
