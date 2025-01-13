@@ -18,7 +18,8 @@ function getNavBarInfo() {
 		statusBarHeight,
 		navHeight,
 		barHeight,
-		menuButtonWidth
+		menuButtonWidth,
+		screenWidth: systemInfo.screenWidth
 	})
 }
 

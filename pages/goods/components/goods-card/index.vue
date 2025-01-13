@@ -1,6 +1,7 @@
 <script setup>
-import { defineProps, ref, defineEmits } from "vue";
+import { defineProps, ref, defineEmits, watch } from "vue";
 import GoodsDetail from "../goods-detail/index.vue";
+import GoodsForm from "../goods-form/index.vue";
 
 const props = defineProps({
   goods: {
@@ -19,6 +20,14 @@ const emit = defineEmits(["selectGoods"]);
 const count = ref(0);
 const isSelected = ref(false);
 const goodsDetailPopup = ref(null);
+const goodsEditPopup = ref(null);
+const goodsFormData = ref({
+  id: "",
+  name: "",
+  referencePrice: 0,
+  thumbnail: "",
+  unit: "",
+});
 
 const setGoodsCardSelected = () => {
   isSelected.value = true;
@@ -34,12 +43,21 @@ const onCountChange = (value) => {
 };
 
 const toGoodsDetail = () => {
-  goodsDetailPopup.value.open();
+  goodsDetailPopup.value.onPopupOpen();
 };
 
-const toGoodsEdit = () => {};
+const toGoodsEdit = () => {
+  goodsEditPopup.value.onPopupOpen();
+};
 
 const onGoodsDelete = () => {};
+
+watch(
+  () => props.goods,
+  (newVal) => {
+    goodsFormData.value = { ...newVal };
+  }
+);
 </script>
 
 <template>
@@ -70,33 +88,27 @@ const onGoodsDelete = () => {};
         />
       </view>
     </view>
-    <uni-popup ref="goodsDetailPopup" type="right">
-      <view class="full-screen-popup">
-        <view class="full-screen-popup-header">
-          <view
-            class="full-screen-popup-header-close"
-            @click="goodsDetailPopup.close"
-          >
-            <uni-icons type="left" size="24" />
-          </view>
-          <view class="full-screen-popup-header-title">商品详情</view>
-        </view>
-        <view class="full-screen-popup-content">
-          <GoodsDetail :goods="goods" />
-        </view>
-        <view class="full-screen-popup-footer">
-          <view class="full-screen-popup-footer-btn-left">
+    <fullscreen-popup
+      ref="goodsDetailPopup"
+      title="商品详情"
+    >
+      <template #content>
+        <GoodsDetail :goods="goods" />
+      </template>
+      <template #footer>
+        <view class="goods-detail-handles">
+          <view class="goods-detail-handles-left">
             <uni-icons type="compose" size="24" @click="toGoodsEdit" />
             <uni-icons type="trash" size="24" @click="onGoodsDelete" />
           </view>
-          <view class="full-screen-popup-footer-right">
+          <view class="goods-detail-handles-right">
             <view
-              class="goods-popup-handle-packed"
+              class="goods-detail-handles-packed"
               @click="setGoodsCardSelected"
               v-if="!isSelected"
               >加入备选</view
             >
-            <view class="goods-popup-handle-add" v-else>
+            <view class="goods-detail-handles-add" v-else>
               <uni-number-box
                 v-model="count"
                 :min="0"
@@ -106,8 +118,22 @@ const onGoodsDelete = () => {};
             </view>
           </view>
         </view>
-      </view>
-    </uni-popup>
+      </template>
+    </fullscreen-popup>
+    <fullscreen-popup
+      ref="goodsEditPopup"
+      title="商品编辑"
+    >
+      <template #content>
+        <GoodsForm v-model="goodsFormData" />
+      </template>
+      <template #footer>
+        <view class="goods-edit-handles">
+          <view class="goods-edit-handles-cancel">取消</view>
+          <view class="goods-edit-handles-save">保存</view>
+        </view>
+      </template>
+    </fullscreen-popup>
   </view>
 </template>
 
@@ -155,11 +181,30 @@ const onGoodsDelete = () => {};
   background-color: #007aff;
 }
 
-.full-screen-popup {
+.goods-detail-handles {
+  flex: 1;
   display: flex;
-  flex-direction: column;
-  height: 100vh;
-  width: 100vw;
-  background-color: #fff;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.goods-detail-handles-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.goods-detail-handles-right {
+  display: flex;
+  align-items: center;
+}
+
+.goods-detail-handles-packed {
+  padding: 2px 10px;
+  border-radius: 6px;
+  color: #fff;
+  background-color: #007aff;
 }
 </style>

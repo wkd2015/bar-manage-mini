@@ -6,7 +6,8 @@ const store = createStore({
 			statusBarHeight: 0,
 			navHeight: 0,
 			barHeight: 0,
-			menuButtonWidth: 0
+			menuButtonWidth: 0,
+			screenWidth: 0
 		}
 	},
 	mutations: {

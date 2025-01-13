@@ -1,5 +1,8 @@
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, computed } from "vue";
+import { useStore } from "vuex";
+
+const store = useStore();
 
 const props = defineProps({
   goods: {
@@ -13,11 +16,12 @@ const props = defineProps({
     }),
   },
 });
+const screenWidth = computed(() => store.getters.navbarInfo.screenWidth);
 </script>
 
 <template>
   <view class="goods-detail">
-    <view class="goods-detail-thumbnail">
+    <view class="goods-detail-thumbnail" :style="`width: ${screenWidth - 40}px; height: ${screenWidth - 40}px;`">
       <image class="goods-detail-thumbnail-image" :src="goods.thumbnail" />
     </view>
     <view class="goods-detail-info">
@@ -31,14 +35,16 @@ const props = defineProps({
 <style scoped>
 .goods-detail {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   background-color: #fff;
-  padding: 12px;
+  padding: 20px;
   gap: 12px;
 }
 
 .goods-detail-thumbnail {
-  width: 375px;
-  height: 375px;
+  width: 335px;
+  height: 335px;
   overflow: hidden;
 }
 
@@ -48,6 +54,7 @@ const props = defineProps({
 }
 
 .goods-detail-info {
+  width: 100%;
   flex: 1;
   display: flex;
   flex-direction: column;

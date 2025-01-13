@@ -2,6 +2,7 @@
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import GoodsList from "../goods/components/goods-list/index.vue";
+import GoodsForm from "../goods/components/goods-form/index.vue";
 import { mockGoodsList } from "../../services/mock";
 
 const store = useStore();
@@ -12,6 +13,13 @@ const goodsPopup = ref(null);
 const goodsList = ref(mockGoodsList);
 const selectedGoodsList = ref([]);
 const searchText = ref("");
+const goodsFormPopup = ref(null);
+const goodsFormData = ref({
+  name: "",
+  referencePrice: 0,
+  thumbnail: "",
+  unit: "",
+});
 
 const onSupplierSelect = () => {};
 const onGoodsSelect = () => {
@@ -28,7 +36,12 @@ const onGoodsSelectedChange = (list) => {
 };
 const onSearchConfirm = () => {};
 const onGoodsSelectConfirm = () => {};
-const toGoodsForm = () => {};
+const toGoodsForm = () => {
+  goodsFormPopup.value.open();
+};
+const onGoodsFormPopupClose = () => {
+  goodsFormPopup.value.close();
+};
 </script>
 
 <template>
@@ -107,6 +120,33 @@ const toGoodsForm = () => {};
             <uni-icons type="plus" size="24" />
           </view>
           <view class="action-sheet-confirm" @click="onGoodsSelectConfirm"> 保存商品 </view>
+        </view>
+      </view>
+    </uni-popup>
+    <uni-popup
+      ref="goodsFormPopup"
+      :safe-area="false"
+      type="right"
+    >
+      <view
+        class="action-sheet"
+        :style="`padding-top: ${navbarInfo.statusBarHeight}px;`"
+      >
+        <view
+          class="action-sheet-header"
+          :style="`padding: 0 ${navbarInfo.menuButtonWidth}px; height: ${navbarInfo.navHeight}px;`"
+        >
+          <view class="action-sheet-header-close" @click="onGoodsFormPopupClose">
+            <uni-icons type="left" size="24" />
+          </view>
+          <text class="action-sheet-title">新建商品</text>
+        </view>
+        <view class="action-sheet-content">
+          <GoodsForm v-model="goodsFormData" />
+        </view>
+        <view class="action-sheet-footer">
+          <view class="action-sheet-form-cancel" @click="onGoodsFormCancel"> 取消 </view>
+          <view class="action-sheet-form-confirm" @click="onGoodsFormConfirm"> 保存 </view>
         </view>
       </view>
     </uni-popup>
