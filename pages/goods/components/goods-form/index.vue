@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, ref, computed, defineModel } from 'vue';
+import { defineProps, defineModel } from 'vue';
 
 const props = defineProps({
   id: {
@@ -14,13 +14,13 @@ const formData = defineModel({
     thumbnail: "",
     unit: ""
 })
-const isEditForm = computed(() => !!props.id)
 </script>
 
 <template>
   <view class="goods-form">
     <uni-forms
       ref="form"
+      label-width="120"
     >
       <uni-forms-item
         required
@@ -46,9 +46,12 @@ const isEditForm = computed(() => !!props.id)
         required
         label="参考价格"
       >
-        <uni-number-box
-          v-model="formData.referencePrice"
-        />
+        <view class="uni-forms-item-content">
+          <uni-number-box
+            v-model="formData.referencePrice"
+          />
+          <text>元(¥)</text>
+        </view>
       </uni-forms-item>
       <uni-forms-item
         required
@@ -64,4 +67,16 @@ const isEditForm = computed(() => !!props.id)
   </view>
 </template>
 
-<style scoped></style>
+<style scoped>
+.goods-form {
+  background-color: #fff;
+  padding: 20px;
+}
+
+.uni-forms-item-content {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: 10px;
+}
+</style>

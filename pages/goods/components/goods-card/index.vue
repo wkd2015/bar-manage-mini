@@ -12,8 +12,13 @@ const props = defineProps({
       referencePrice: 0,
       thumbnail: "",
       unit: "",
+      count: 0
     }),
   },
+  initCount: {
+    type: Number,
+    default: 0
+  }
 });
 const emit = defineEmits(["selectGoods"]);
 
@@ -50,6 +55,21 @@ const toGoodsEdit = () => {
   goodsEditPopup.value.onPopupOpen();
 };
 
+const resetGoodsEdit = () => {
+  goodsFormData.value = { ...props.goods };
+}
+
+const onGoodsEditCancel = () => {
+  resetGoodsEdit()
+  goodsEditPopup.value.onPopupClose()
+}
+
+const onGoodsEditSave = () => {
+  // TODO：保存
+  resetGoodsEdit()
+  goodsEditPopup.value.onPopupClose()
+}
+
 const onGoodsDelete = () => {};
 
 watch(
@@ -57,6 +77,16 @@ watch(
   (newVal) => {
     goodsFormData.value = { ...newVal };
   }
+);
+
+watch(
+  () => props.initCount,
+  (newVal) => {
+    console.warn('initCount', newVal);
+    count.value = newVal;
+    isSelected.value = newVal > 0;
+  },
+  { immediate: true }
 );
 </script>
 
@@ -129,8 +159,8 @@ watch(
       </template>
       <template #footer>
         <view class="goods-edit-handles">
-          <view class="goods-edit-handles-cancel">取消</view>
-          <view class="goods-edit-handles-save">保存</view>
+          <view class="goods-edit-handles-cancel" @click="onGoodsEditCancel">取消</view>
+          <view class="goods-edit-handles-save" @click="onGoodsEditSave">保存</view>
         </view>
       </template>
     </fullscreen-popup>
@@ -142,7 +172,7 @@ watch(
   display: flex;
   background-color: #fff;
   padding: 10px 12px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-bottom: 0.5px solid #eee;
 }
 
 .goods-card-thumbnail {
@@ -206,5 +236,39 @@ watch(
   border-radius: 6px;
   color: #fff;
   background-color: #007aff;
+}
+
+.goods-edit-handles {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 14px;
+  gap: 16px;
+}
+
+.goods-edit-handles-cancel {
+  flex: 1;
+  height: 36px;
+  border-radius: 6px;
+  color: #007aff;
+  border: 0.5px solid #007aff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.goods-edit-handles-save {
+  flex: 1;
+  height: 36px;
+  border-radius: 6px;
+  color: #fff;
+  background-color: #007aff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
 }
 </style>

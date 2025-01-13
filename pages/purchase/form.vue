@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import GoodsList from "../goods/components/goods-list/index.vue";
 import GoodsForm from "../goods/components/goods-form/index.vue";
+import GoodsCard from "../goods/components/goods-card/index.vue";
 import { mockGoodsList } from "../../services/mock";
 
 const store = useStore();
@@ -12,6 +13,7 @@ const orderDateTime = ref("");
 const goodsPopup = ref(null);
 const goodsList = ref(mockGoodsList);
 const selectedGoodsList = ref([]);
+const purchaseGoodsList = ref([]);
 const searchText = ref("");
 const goodsFormPopup = ref(null);
 const goodsFormData = ref({
@@ -23,10 +25,10 @@ const goodsFormData = ref({
 
 const onSupplierSelect = () => {};
 const onGoodsSelect = () => {
-  goodsPopup.value.open();
+  goodsPopup.value.onPopupOpen();
 };
 const onGoodsPopupClose = () => {
-  goodsPopup.value.close();
+  goodsPopup.value.onPopupClose();
 };
 const onGoodsSelectPopupReset = () => {
   searchText.value = "";
@@ -35,12 +37,38 @@ const onGoodsSelectedChange = (list) => {
   selectedGoodsList.value = (list || []).filter((item) => item.count > 0);
 };
 const onSearchConfirm = () => {};
-const onGoodsSelectConfirm = () => {};
-const toGoodsForm = () => {
-  goodsFormPopup.value.open();
+const onGoodsSelectConfirm = () => {
+  purchaseGoodsList.value = selectedGoodsList.value;
+  goodsPopup.value.onPopupClose();
+  selectedGoodsList.value = [];
 };
-const onGoodsFormPopupClose = () => {
-  goodsFormPopup.value.close();
+const onPurchaseGoodsSelect = (goods) => {
+  let currentPurchaseGoodsList = purchaseGoodsList.value
+  if (currentPurchaseGoodsList.find(item => item.id === goods.id)) {
+    currentPurchaseGoodsList = currentPurchaseGoodsList.map(item => item.id === goods.id ? goods : item)
+  } else {
+    currentPurchaseGoodsList.push(goods)
+  }
+  purchaseGoodsList.value = currentPurchaseGoodsList.filter(item => item.count > 0)
+};
+const toGoodsForm = () => {
+  goodsFormPopup.value.onPopupOpen();
+};
+const resetGoodsAdd = () => {
+  goodsFormData.value = {
+    name: "",
+    referencePrice: 0,
+    thumbnail: "",
+    unit: "",
+  }
+}
+const onGoodsFormCancel = () => {
+  resetGoodsAdd();
+  goodsFormPopup.value.onPopupClose();
+};
+const onGoodsFormConfirm = () => {
+  resetGoodsAdd();
+  goodsFormPopup.value.onPopupClose();
 };
 </script>
 
@@ -71,6 +99,15 @@ const onGoodsFormPopupClose = () => {
           <view class="purchase-form-item-btn" @click="onGoodsSelect"
             >选择商品</view
           >
+          <view class="purchase-form-item-list">
+            <GoodsCard
+              v-for="item in purchaseGoodsList"
+              :key="item.id"
+              :goods="item"
+              :initCount="item.count"
+              @select-goods="onPurchaseGoodsSelect"
+            />
+          </view>
         </view>
       </view>
     </view>
@@ -78,22 +115,13 @@ const onGoodsFormPopupClose = () => {
       <uni-popup ref="supplierPopup" type="bottom" :safe-area="false">
       </uni-popup>
     </view>
-    <uni-popup ref="goodsPopup" type="right" :safe-area="false">
-      <view
-        class="action-sheet"
-        :style="`padding-top: ${navbarInfo.statusBarHeight}px;`"
-      >
-        <view
-          class="action-sheet-header"
-          :style="`padding: 0 ${navbarInfo.menuButtonWidth}px; height: ${navbarInfo.navHeight}px;`"
-        >
-          <view class="action-sheet-header-close" @click="onGoodsPopupClose">
-            <uni-icons type="left" size="24" />
-          </view>
-          <text class="action-sheet-title">选择商品</text>
-        </view>
-        <view class="action-sheet-content">
-          <view class="action-sheet-search">
+    <fullscreen-popup
+      ref="goodsPopup"
+      title="选择商品"
+    >
+      <template #content>
+        <view class="goods-content">
+          <view class="goods-content-search">
             <uni-search-bar
               v-model="searchText"
               placeholder="搜索商品"
@@ -106,8 +134,9 @@ const onGoodsFormPopupClose = () => {
             @select-goods="onGoodsSelectedChange"
           />
         </view>
-        <view class="action-sheet-footer">
-          <!-- TODO: 点击弹出已选商品 -->
+      </template>
+      <template #footer>
+        <view class="goods-handles">
           <uni-badge
             size="small"
             :text="selectedGoodsList.length"
@@ -119,37 +148,25 @@ const onGoodsFormPopupClose = () => {
           <view class="action-sheet-add-goods" @click="toGoodsForm">
             <uni-icons type="plus" size="24" />
           </view>
-          <view class="action-sheet-confirm" @click="onGoodsSelectConfirm"> 保存商品 </view>
+          <view class="goods-handles-confirm" @click="onGoodsSelectConfirm"> 保存商品 </view>
         </view>
-      </view>
-    </uni-popup>
-    <uni-popup
+      </template>
+    </fullscreen-popup>
+    <fullscreen-popup
       ref="goodsFormPopup"
-      :safe-area="false"
-      type="right"
+      title="新建商品"
+      @close="resetGoodsAdd"
     >
-      <view
-        class="action-sheet"
-        :style="`padding-top: ${navbarInfo.statusBarHeight}px;`"
-      >
-        <view
-          class="action-sheet-header"
-          :style="`padding: 0 ${navbarInfo.menuButtonWidth}px; height: ${navbarInfo.navHeight}px;`"
-        >
-          <view class="action-sheet-header-close" @click="onGoodsFormPopupClose">
-            <uni-icons type="left" size="24" />
-          </view>
-          <text class="action-sheet-title">新建商品</text>
+      <template #content>
+        <GoodsForm v-model="goodsFormData" />
+      </template>
+      <template #footer>
+        <view class="goods-add-handles">
+          <view class="goods-add-handles-cancel" @click="onGoodsFormCancel">取消</view>
+          <view class="goods-add-handles-confirm" @click="onGoodsFormConfirm">保存</view>
         </view>
-        <view class="action-sheet-content">
-          <GoodsForm v-model="goodsFormData" />
-        </view>
-        <view class="action-sheet-footer">
-          <view class="action-sheet-form-cancel" @click="onGoodsFormCancel"> 取消 </view>
-          <view class="action-sheet-form-confirm" @click="onGoodsFormConfirm"> 保存 </view>
-        </view>
-      </view>
-    </uni-popup>
+      </template>
+    </fullscreen-popup>
   </view>
 </template>
 
@@ -233,37 +250,7 @@ const onGoodsFormPopupClose = () => {
   display: none;
 }
 
-.action-sheet {
-  padding-bottom: env(safe-area-inset-bottom);
-  box-sizing: border-box;
-  background-color: #fff;
-  border-radius: 10px 10px 0 0;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  width: 100vw;
-  z-index: 999;
-}
-
-.action-sheet-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  border-bottom: 0.5px solid #eee;
-}
-
-.action-sheet-header-close {
-  position: absolute;
-  left: 12px;
-}
-
-.action-sheet-title {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.action-sheet-content {
+.goods-content {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -271,11 +258,12 @@ const onGoodsFormPopupClose = () => {
   background-color: #f5f5f5;
 }
 
-.action-sheet-search {
+.goods-content-search {
   background-color: #fff;
 }
 
-.action-sheet-footer {
+.goods-handles {
+  flex: 1;
   height: 50px;
   display: flex;
   justify-content: space-between;
@@ -284,7 +272,7 @@ const onGoodsFormPopupClose = () => {
   padding: 0 12px;
 }
 
-.action-sheet-confirm {
+.goods-handles-confirm {
   flex: 1;
   height: 35px;
   display: flex;
@@ -292,10 +280,47 @@ const onGoodsFormPopupClose = () => {
   justify-content: center;
   font-size: 14px;
   border-radius: 6px;
-}
-
-.action-sheet-confirm {
   background-color: #007aff;
   color: #fff;
+}
+
+.goods-add-handles {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 14px;
+  gap: 16px;
+}
+
+.goods-add-handles-cancel {
+  flex: 1;
+  height: 36px;
+  border-radius: 6px;
+  color: #007aff;
+  border: 0.5px solid #007aff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.goods-add-handles-confirm {
+  flex: 1;
+  height: 36px;
+  border-radius: 6px;
+  color: #fff;
+  background-color: #007aff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.purchase-form-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, defineProps, defineExpose } from "vue";
+import { ref, computed, defineProps, defineExpose, defineEmits } from "vue";
 import { useStore } from "vuex";
 
 const store = useStore();
@@ -10,14 +10,17 @@ const props = defineProps({
     default: "",
   }
 })
+const emit = defineEmits(["close", "open"])
 const fullscreenPopup = ref(null);
 const navbarInfo = computed(() => store.getters.navbarInfo);
 
 const onPopupClose = () => {
+  emit("close");
   fullscreenPopup.value.close();
 }
 
 const onPopupOpen = () => {
+  emit("open");
   fullscreenPopup.value.open();
 }
 

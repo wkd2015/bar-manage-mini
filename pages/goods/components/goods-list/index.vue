@@ -44,6 +44,5 @@ const onGoodsSelect = (goods) => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 </style>
