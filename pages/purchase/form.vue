@@ -11,14 +11,24 @@ const orderDateTime = ref("");
 const goodsPopup = ref(null);
 const goodsList = ref(mockGoodsList);
 const selectedGoodsList = ref([]);
+const searchText = ref("");
 
 const onSupplierSelect = () => {};
 const onGoodsSelect = () => {
-  goodsPopup.value.open("bottom");
+  goodsPopup.value.open();
 };
+const onGoodsPopupClose = () => {
+  goodsPopup.value.close();
+};
+const onGoodsSelectPopupReset = () => {
+  searchText.value = "";
+}
 const onGoodsSelectedChange = (list) => {
-  selectedGoodsList.value = list;
+  selectedGoodsList.value = (list || []).filter((item) => item.count > 0);
 };
+const onSearchConfirm = () => {};
+const onGoodsSelectConfirm = () => {};
+const toGoodsForm = () => {};
 </script>
 
 <template>
@@ -52,28 +62,51 @@ const onGoodsSelectedChange = (list) => {
       </view>
     </view>
     <view class="supplier-popup">
-      <uni-popup ref="supplierPopup" type="bottom" :safe-area="false"> </uni-popup>
+      <uni-popup ref="supplierPopup" type="bottom" :safe-area="false">
+      </uni-popup>
     </view>
     <uni-popup ref="goodsPopup" type="right" :safe-area="false">
-      <view class="action-sheet" :style="`padding-top: ${navbarInfo.statusBarHeight}px;`">
-        <view class="action-sheet-header" :style="`margin-right: ${navbarInfo.menuButtonWidth}px; height: ${navbarInfo.navHeight}px;`">
+      <view
+        class="action-sheet"
+        :style="`padding-top: ${navbarInfo.statusBarHeight}px;`"
+      >
+        <view
+          class="action-sheet-header"
+          :style="`padding: 0 ${navbarInfo.menuButtonWidth}px; height: ${navbarInfo.navHeight}px;`"
+        >
+          <view class="action-sheet-header-close" @click="onGoodsPopupClose">
+            <uni-icons type="left" size="24" />
+          </view>
           <text class="action-sheet-title">选择商品</text>
-          <view class="action-sheet-add-btn">添加</view>
         </view>
         <view class="action-sheet-content">
-          <GoodsList :goodsList="goodsList" @select-goods="onGoodsSelectedChange" />
+          <view class="action-sheet-search">
+            <uni-search-bar
+              v-model="searchText"
+              placeholder="搜索商品"
+              cancelButton="none"
+              @confirm="onSearchConfirm"
+            />
+          </view>
+          <GoodsList
+            :goodsList="goodsList"
+            @select-goods="onGoodsSelectedChange"
+          />
         </view>
         <view class="action-sheet-footer">
           <!-- TODO: 点击弹出已选商品 -->
-          <uni-badge size="small" :text="selectedGoodsList.length" absolute="rightTop" type="primary">
+          <uni-badge
+            size="small"
+            :text="selectedGoodsList.length"
+            absolute="rightTop"
+            type="primary"
+          >
             <uni-icons type="cart" size="24" />
           </uni-badge>
-          <view
-          class="action-sheet-confirm"
-            @click=""
-          >
-            保存商品
+          <view class="action-sheet-add-goods" @click="toGoodsForm">
+            <uni-icons type="plus" size="24" />
           </view>
+          <view class="action-sheet-confirm" @click="onGoodsSelectConfirm"> 保存商品 </view>
         </view>
       </view>
     </uni-popup>
@@ -168,23 +201,21 @@ const onGoodsSelectedChange = (list) => {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100vw;
   z-index: 999;
 }
 
 .action-sheet-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 12px;
+  position: relative;
   border-bottom: 0.5px solid #eee;
 }
 
-.action-sheet-add-btn {
-  font-size: 12px;
-  border-radius: 6px;
-  color: #333;
-  border: 0.5px solid #333;
-  padding: 2px 10px;
+.action-sheet-header-close {
+  position: absolute;
+  left: 12px;
 }
 
 .action-sheet-title {
@@ -198,6 +229,10 @@ const onGoodsSelectedChange = (list) => {
   flex-direction: column;
   gap: 10px;
   background-color: #f5f5f5;
+}
+
+.action-sheet-search {
+  background-color: #fff;
 }
 
 .action-sheet-footer {
