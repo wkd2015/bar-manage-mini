@@ -1,5 +1,4 @@
 <script setup>
-import { ref } from "vue";
 import {
   PURCHASE_STATUS,
   PURCHASE_STATUS_MAP,
@@ -141,10 +140,8 @@ const props = defineProps({
   display: flex;
   flex-direction: column;
   background-color: #fff;
-  border-radius: 10px;
   padding: 16px 10px;
-  margin: 0 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-bottom: 0.5px solid #eee;
 }
 
 .card-title {

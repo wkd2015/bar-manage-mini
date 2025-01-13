@@ -44,12 +44,12 @@ const navbarInfo = computed(() => store.getters.navbarInfo)
 		class="navbar"
 		:style="`height: ${navbarInfo.barHeight}px; padding-top: ${
 			navbarInfo.statusBarHeight
-		}px; background: rgba(255, 251, 238, ${opacity}); ${
-			opacity === 1 && 'box-shadow: 0px 1px 13.4px 0px rgba(171, 128, 64, 0.34);'
+		}px; background: rgba(255, 255, 255, ${opacity}); ${
+			opacity === 1 && 'box-shadow: 0px 1px 13.4px 0px rgba(0, 0, 0, 0.1);'
 		}`"
 	>
 		<!-- TODO: fix: 现阶段不支持传入颜色显示svg，右上角图标需要改成可配置 -->
-		<image :src="navbarBackIcon" class="navbar-back" @click="onNavClick" v-if="showNavBack"></image>
+		<uni-icons type="left" size="24" class="navbar-back" @click="onNavClick" v-if="showNavBack" />
 		<view class="navbar-title" :style="`height: ${navbarInfo.navHeight}px; color: ${eleColor}`">{{
 			title
 		}}</view>
@@ -68,8 +68,6 @@ const navbarInfo = computed(() => store.getters.navbarInfo)
 	z-index: 99;
 
 	&-back {
-		width: 24px;
-		height: 24px;
 		padding-left: 16px;
 		position: fixed;
 	}

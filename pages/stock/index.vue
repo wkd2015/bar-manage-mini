@@ -1,6 +1,6 @@
 <template>
   <view class="container" :style="`padding-top: ${navbarInfo.barHeight}px;`">
-    <navbar title="库存管理" class="navbar"></navbar>
+    <navbar title="库存" :opacity="1"></navbar>
 
     <view class="search-box">
       <uni-search-bar
@@ -173,6 +173,7 @@
         </view>
       </view>
     </uni-popup>
+    <tabbar-shadow />
   </view>
 </template>
 

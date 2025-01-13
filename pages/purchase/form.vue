@@ -70,11 +70,18 @@ const onGoodsFormConfirm = () => {
   resetGoodsAdd();
   goodsFormPopup.value.onPopupClose();
 };
+
+const onPurchaseFormCancel = () => {
+  uni.navigateBack({ delta: 1 });
+};
+const onPurchaseFormConfirm = () => {
+  // TODO: 表单校验
+};
 </script>
 
 <template>
   <view class="container" :style="`padding-top: ${navbarInfo.barHeight}px;`">
-    <navbar title="新建采购" class="navbar"></navbar>
+    <navbar title="新建采购" class="navbar" :showNavBack="true" :onNavClick="onPurchaseFormCancel"></navbar>
     <view class="purchase-form">
       <view class="purchase-form-group">
         <view class="purchase-form-item">
@@ -109,6 +116,10 @@ const onGoodsFormConfirm = () => {
             />
           </view>
         </view>
+      </view>
+      <view class="purchase-form-footer">
+        <view class="purchase-form-footer-cancel" @click="onPurchaseFormCancel">取消</view>
+        <view class="purchase-form-footer-confirm" @click="onPurchaseFormConfirm">确认</view>
       </view>
     </view>
     <view class="supplier-popup">
@@ -179,7 +190,6 @@ const onGoodsFormConfirm = () => {
 }
 
 .purchase-form {
-  padding: 12px;
   background-color: #f5f5f5;
   flex: 1;
   display: flex;
@@ -188,9 +198,8 @@ const onGoodsFormConfirm = () => {
 
 .purchase-form-group {
   background-color: #fff;
-  border-radius: 6px;
   padding: 0 12px;
-  margin-bottom: 12px;
+  margin: 12px 0;
 }
 
 .purchase-form-item {
@@ -216,7 +225,6 @@ const onGoodsFormConfirm = () => {
 .purchase-form-vertical-item .purchase-form-item-btn {
   width: 100%;
   height: 30px;
-  border-radius: 10px;
   color: #333;
   background-color: #f5f5f5;
   display: flex;
@@ -244,6 +252,45 @@ const onGoodsFormConfirm = () => {
   line-height: 35px;
   font-size: 12px;
   color: #333;
+}
+
+.purchase-form-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  height: calc(50px + env(safe-area-inset-bottom));
+  padding: 0 12px;
+  background-color: #fff;
+  margin-top: auto;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-sizing: border-box;
+}
+
+.purchase-form-footer-confirm {
+  flex: 1;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: 6px;
+  background-color: #007aff;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+.purchase-form-footer-cancel {
+  flex: 1;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 0.5px solid #007aff;
+  color: #007aff;
+  box-sizing: border-box;
 }
 
 :deep(.icon-calendar) {

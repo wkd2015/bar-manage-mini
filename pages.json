@@ -23,32 +23,38 @@
 			"style": {
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/user/index",
+			"style": {
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"tabBar": {
 		"borderStyle": "white",
-		"color": "#4D1F00",
-		"selectedColor": "#D2781F",
+		"color": "#8a8a8a",
+		"selectedColor": "#1296db",
 		"spacing": "2px",
 		"height": "42px",
 		"list": [
 			{
 				"pagePath": "pages/index/index",
-				"text": "首页"
-				// "iconPath": "/static/tab-index-icon.png",
-				// "selectedIconPath": "/static/tab-index-selected-icon.png"
+				"text": "首页",
+				"iconPath": "/static/imgs/home.png",
+				"selectedIconPath": "/static/imgs/home-selected.png"
 			},
 			{
 				"pagePath": "pages/stock/index",
-				"text": "库存"
-				// "iconPath": "/static/tab-visual-icon.png",
-				// "selectedIconPath": "/static/tab-visual-selected-icon.png"
+				"text": "库存",
+				"iconPath": "/static/imgs/stock.png",
+				"selectedIconPath": "/static/imgs/stock-selected.png"
 			},
 			{
-				"pagePath": "pages/purchase/index",
-				"text": "我的"
-				// "iconPath": "/static/tab-data-icon.png",
-				// "selectedIconPath": "/static/tab-data-selected-icon.png"
+				"pagePath": "pages/user/index",
+				"text": "我的",
+				"iconPath": "/static/imgs/user.png",
+				"selectedIconPath": "/static/imgs/user-selected.png"
 			}
 		]
 	},
