@@ -22,6 +22,10 @@ const goodsFormData = ref({
   thumbnail: "",
   unit: "",
 });
+const purchasePrice = ref(0)
+const allGoodsRefrencePrice = computed(() => {
+  return purchaseGoodsList.value.reduce((total, item) => total + item.referencePrice * item.count, 0);
+})
 
 const onSupplierSelect = () => {};
 const onGoodsSelect = () => {
@@ -115,6 +119,18 @@ const onPurchaseFormConfirm = () => {
               @select-goods="onPurchaseGoodsSelect"
             />
           </view>
+        </view>
+        <view class="purchase-form-item">
+          <view class="purchase-form-item-label">参考价格</view>
+          <view class="purchase-form-item-content">￥{{ allGoodsRefrencePrice }}</view>
+        </view>
+        <view class="purchase-form-item">
+          <view class="purchase-form-item-label">实付价格</view>
+          <uni-number-box
+            v-model="purchasePrice"
+            :min="0"
+            :max="99999"
+          />
         </view>
       </view>
       <view class="purchase-form-footer">
@@ -220,6 +236,13 @@ const onPurchaseFormConfirm = () => {
   font-size: 16px;
   width: 100%;
   border-bottom: 0.5px solid #eee;
+}
+
+.purchase-form-item-content {
+  font-size: 14px;
+  line-height: 35px;
+  color: #333;
+  flex: 1;
 }
 
 .purchase-form-vertical-item .purchase-form-item-btn {

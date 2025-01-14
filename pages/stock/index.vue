@@ -1,6 +1,25 @@
 <template>
   <view class="container" :style="`padding-top: ${navbarInfo.barHeight}px;`">
     <navbar title="库存" :opacity="1"></navbar>
+    <!-- <view class="stock-content">
+      <view class="stock-search">
+        <uni-search-bar
+          v-model="searchText"
+          placeholder="搜索商品"
+          @confirm="onSearch"
+        />
+        <view class="stock-search-tabs">
+          <view
+            v-for="(tab, index) in tabs"
+            :key="index"
+            :class="['tab-item', { active: currentTab === index }]"
+            @tap="switchTab(index)"
+          >
+            <text>{{ tab }}</text>
+          </view>
+        </view>
+      </view>
+    </view> -->
 
     <view class="search-box">
       <uni-search-bar
