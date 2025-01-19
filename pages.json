@@ -45,6 +45,12 @@
 				"selectedIconPath": "/static/imgs/home-selected.png"
 			},
 			{
+				"pagePath": "pages/purchase/index",
+				"text": "采购",
+				"iconPath": "/static/imgs/purchase.png",
+				"selectedIconPath": "/static/imgs/purchase-selected.png"
+			},
+			{
 				"pagePath": "pages/stock/index",
 				"text": "库存",
 				"iconPath": "/static/imgs/stock.png",
