@@ -1,7 +1,7 @@
 <template>
   <view class="container" :style="`padding-top: ${navbarInfo.barHeight}px;`">
     <navbar title="库存" :opacity="1"></navbar>
-    <view class="stock-content">
+    <view class="stock-content" :style="`height: calc(100vh - ${navbarInfo.barHeight}px);`">
       <view class="stock-search">
         <view class="stock-search-box">
           <uni-search-bar
@@ -19,22 +19,18 @@
       </view>
 
       <view class="stock-list">
-        <scroll-view scroll-y @scrolltolower="loadMore">
-          <view class="stock-list-container">
-            <StockCard 
-              v-for="item in stockList"
-              :key="item.id"
-              :stock-info="item"
-              @open="openStockPopup"
-              @in-stock="handleInStock"
-              @out-stock="handleOutStock"
-            />
-          </view>
-        </scroll-view>
+        <StockCard 
+          v-for="item in stockList"
+          :key="item.id"
+          :stock-info="item"
+          @open="openStockPopup"
+          @in-stock="handleInStock"
+          @out-stock="handleOutStock"
+        />
       </view>
       <view class="stock-bottom">
-        <view class="stock-bottom-button" @click="openPurchaseStockInPopup">批量出库</view>
-        <view class="stock-bottom-button" @click="openPurchaseStockOutPopup">批量开封</view>
+        <view class="stock-bottom-out" @click="openPurchaseStockInPopup">批量出库</view>
+        <view class="stock-bottom-open" @click="openPurchaseStockOutPopup">批量开封</view>
       </view>
     </view>
     <uni-popup
@@ -92,7 +88,6 @@
       @trigger="onFabContentClick"
       @fabClick="onFabClick"
     />
-    <tabbar-shadow />
   </view>
 </template>
 
@@ -180,10 +175,8 @@ const onFabClick = () => {
 }
 
 .stock-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
-
 }
 
 .stock-search {
@@ -211,12 +204,8 @@ const onFabClick = () => {
 
 .stock-list {
   flex: 1;
-}
-
-.stock-list-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  overflow-y: scroll;
+  margin: 10px 0;
 }
 
 .filter-popup {
@@ -280,5 +269,43 @@ const onFabClick = () => {
   font-size: 12px;
   color: #fff;
   height: 28px;
+}
+
+.stock-bottom {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 12px;
+  gap: 5px;
+  padding: 0 10px;
+}
+
+.stock-bottom-out,.stock-bottom-open {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  height: 32px;
+  box-sizing: border-box;
+  color: #fff;
+}
+
+.stock-bottom-out {
+  background-color: #007aff;
+}
+
+.stock-bottom-open {
+  background-color: #18bc37;
+}
+
+:deep(.uni-fab--rightBottom) {
+  bottom: 90px!important;
+}
+:deep(.uni-fab__circle--rightBottom) {
+  bottom: 90px!important;
 }
 </style>

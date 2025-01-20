@@ -156,4 +156,22 @@ export const mockStockList = [
     price: 90,
     unit: "瓶",
   },
+  {
+    id: "5",
+    name: "白兰地",
+    stockNum: 100,
+    thumbnail: mockPic,
+    openedNum: 10,
+    price: 100,
+    unit: "瓶",
+  },
+  {
+    id: "6",
+    name: "威士忌",
+    stockNum: 100,
+    thumbnail: mockPic,
+    openedNum: 10,
+    price: 90,
+    unit: "瓶",
+  },
 ]

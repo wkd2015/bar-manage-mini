@@ -8,6 +8,7 @@ const props = defineProps({
   purchaseParams: {
     type: Object,
     default: () => ({
+      id: "",
       supplier: {
         name: "",
         id: "",
@@ -28,11 +29,17 @@ const props = defineProps({
     }),
   },
 });
+
+const toPurchaseDetail = () => {
+  uni.navigateTo({
+    url: '/pages/purchase/detail?id=' + props.purchaseParams.id
+  })
+}
 </script>
 
 <template>
   <view class="purchase-card">
-    <view class="card-title">
+    <view class="card-title" @click="toPurchaseDetail">
       <text class="card-title-text">{{ purchaseParams.supplier.name }}</text>
       <text
         class="card-title-status"
@@ -42,7 +49,7 @@ const props = defineProps({
         >{{ PURCHASE_STATUS_MAP[purchaseParams.status || 0].label }}</text
       >
     </view>
-    <view class="card-content">
+    <view class="card-content" @click="toPurchaseDetail">
       <template v-if="purchaseParams.goodsList.length === 0">
         <text class="card-content-text card-content-text-error"
           >商品信息获取失败</text

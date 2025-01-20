@@ -1,7 +1,7 @@
 export const PURCHASE_STATUS = {
-  // 待采购确认
+  // 待采购确认/待上传发货单
   WAIT_PURCHASE_CONFIRM: 0,
-  // 采购确认
+  // 采购确认/已发货
   PURCHASE_CONFIRMED: 1,
   // 待入库
   WAIT_IN_STORAGE: 2,
@@ -17,7 +17,7 @@ export const PURCHASE_STATUS_MAP = {
     color: "#FFA500",
   },
   [PURCHASE_STATUS.PURCHASE_CONFIRMED]: {
-    label: "采购确认",
+    label: "已发货",
     color: "#008000",
   },
   [PURCHASE_STATUS.WAIT_IN_STORAGE]: {

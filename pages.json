@@ -25,6 +25,12 @@
 			}
 		},
 		{
+			"path": "pages/purchase/detail",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/user/index",
 			"style": {
 				"navigationStyle": "custom"
