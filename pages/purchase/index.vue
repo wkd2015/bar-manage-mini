@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import purchaseCard from "./components/purchase-card/index.vue";
+import {PurchaseService} from "../../services/purchase";
 
 import { mockPurchaseList } from "../../services/mock";
 
@@ -14,12 +15,24 @@ const contentText = ref({
   contentnomore: "没有更多数据了",
 });
 const navbarInfo = computed(() => store.getters.navbarInfo);
+const purchaseList = ref([]);
+
+const getPurchaseList = async () => {
+  const res = await PurchaseService.getPurchaseList({})
+  console.warn(res)
+  purchaseList.value = res
+}
 
 const onPurchaseCreate = () => {
   uni.navigateTo({
     url: "/pages/purchase/form",
   });
 };
+
+onMounted(async () => {
+  console.log("6932938u");
+  await getPurchaseList();
+})
 </script>
 
 <template>

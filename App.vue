@@ -26,6 +26,7 @@ function getNavBarInfo() {
 onLaunch(() => {
 	console.log('App Launch')
 	getNavBarInfo()
+	wx.cloud.init()
 })
 
 onShow(() => {

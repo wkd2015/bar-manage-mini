@@ -132,6 +132,14 @@ const onPurchaseFormConfirm = () => {
             :max="99999"
           />
         </view>
+        <view class="purchase-form-item">
+          <view class="purchase-form-item-label">付款账户</view>
+          <uni-easyinput
+            v-model="bankAccount"
+            type="text"
+            placeholder="请输入付款账户"
+          />
+        </view>
       </view>
       <view class="purchase-form-footer">
         <view class="purchase-form-footer-cancel" @click="onPurchaseFormCancel">取消</view>
