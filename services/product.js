@@ -1,31 +1,31 @@
 import request from "./request"
 
-const baseUrl = '/api'
+const baseUrl = '/api/product'
 
 export class ProductClass {
   static async createProduct(data) {
     return request({
-      path: `${baseUrl}/product/create`,
+      path: `${baseUrl}/create`,
       method: 'POST',
       data
     })
   }
   static async updateProduct(data) {
     return request({
-      path: `${baseUrl}/product/update/${data.id}`,
+      path: `${baseUrl}/update/${data.id}`,
       method: 'POST',
       data
     })
   }
   static async getProductDetail(id) {
     return request({
-      path: `${baseUrl}/product/get/${id}`,
+      path: `${baseUrl}/get/${id}`,
       method: 'GET'
     })
   }
   static async getProductList(data) {
     return request({
-      path: `${baseUrl}/product/search`,
+      path: `${baseUrl}/search`,
       method: 'GET',
       data
     })

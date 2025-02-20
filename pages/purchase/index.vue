@@ -20,7 +20,7 @@ const purchaseList = ref([]);
 const getPurchaseList = async () => {
   const res = await PurchaseService.getPurchaseList({})
   console.warn(res)
-  purchaseList.value = res
+  purchaseList.value = res.data || []
 }
 
 const onPurchaseCreate = () => {

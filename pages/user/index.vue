@@ -9,6 +9,7 @@ const navbarInfo = computed(() => store.getters.navbarInfo);
 <template>
   <view class="user" :style="`padding-top: ${navbarInfo.barHeight}px;`">
     <navbar title="我的" :opacity="1"></navbar>
+    
     <tabbar-shadow />
   </view>
 </template>
