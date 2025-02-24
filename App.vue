@@ -27,6 +27,7 @@ onLaunch(() => {
 	console.log('App Launch')
 	getNavBarInfo()
 	wx.cloud.init()
+	store.dispatch("setUserInfo")
 })
 
 onShow(() => {

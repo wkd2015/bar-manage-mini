@@ -9,8 +9,8 @@ const props = defineProps({
     default: () => ({
       id: "",
       name: "",
-      referencePrice: 0,
-      thumbnail: "",
+      estimatedPrice: 0,
+      imageUrl: "",
       unit: "",
       count: 0
     }),
@@ -29,8 +29,8 @@ const goodsEditPopup = ref(null);
 const goodsFormData = ref({
   id: "",
   name: "",
-  referencePrice: 0,
-  thumbnail: "",
+  estimatedPrice: 0,
+  imageUrl: "",
   unit: "",
 });
 
@@ -93,13 +93,13 @@ watch(
 <template>
   <view class="goods-card">
     <view class="goods-card-thumbnail" @click="toGoodsDetail">
-      <image class="goods-card-thumbnail-image" :src="goods.thumbnail" />
+      <image class="goods-card-thumbnail-image" :src="goods.imageUrl" />
     </view>
     <view class="goods-card-info" @click="toGoodsDetail">
       <view class="goods-name">商品名称：{{ goods.name }}</view>
-      <view class="goods-unit">商品单位：{{ goods.unit }}</view>
+      <!-- <view class="goods-unit">商品单位：{{ goods.unit }}</view> -->
       <view class="goods-reference-price"
-        >参考价格：￥{{ goods.referencePrice }}</view
+        >参考价格：￥{{ goods.estimatedPrice }}</view
       >
     </view>
     <view class="goods-card-handle">

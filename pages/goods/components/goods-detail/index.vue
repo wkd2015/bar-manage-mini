@@ -10,8 +10,8 @@ const props = defineProps({
     default: () => ({
       id: "",
       name: "",
-      referencePrice: 0,
-      thumbnail: "",
+      estimatedPrice: 0,
+      imageUrl: "",
       unit: "",
     }),
   },
@@ -22,12 +22,12 @@ const screenWidth = computed(() => store.getters.navbarInfo.screenWidth);
 <template>
   <view class="goods-detail">
     <view class="goods-detail-thumbnail" :style="`width: ${screenWidth - 40}px; height: ${screenWidth - 40}px;`">
-      <image class="goods-detail-thumbnail-image" :src="goods.thumbnail" />
+      <image class="goods-detail-thumbnail-image" :src="goods.imageUrl" />
     </view>
     <view class="goods-detail-info">
       <view class="goods-name">商品名称：{{ goods.name }}</view>
       <view class="goods-unit">商品单位：{{ goods.unit }}</view>
-      <view class="goods-reference-price">参考价格：￥{{ goods.referencePrice }}</view>
+      <view class="goods-reference-price">参考价格：￥{{ goods.estimatedPrice }}</view>
     </view>
   </view>
 </template>

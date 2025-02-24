@@ -13,6 +13,7 @@ const formData = ref({
   phone: "",
   avatar: "",
   gender: 0,
+  shopId: 0
 });
 const navTitle = computed(() => {
   return formData.value.id ? "编辑用户" : "注册用户";
@@ -26,11 +27,19 @@ const onFormChangeSubmit = async () => {
   const isEdit = !!formData.value.id;
   if (isEdit) {
     await StaffService.editStaff(formData.value);
+    store.dispatch('setUserInfo');
+    onNavClick();
   } else {
-    await StaffService.createStaff(formData.value);
+    const createParams = {
+      ...formData.value,
+      id: undefined
+    }
+    await StaffService.createStaff(createParams);
+    store.dispatch('setUserInfo');
+    uni.switchTab({
+      url: "/pages/index/index",
+    });
   }
-  store.dispatch('setUserInfo');
-  onNavClick();
 }
 
 onMounted(() => {

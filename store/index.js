@@ -15,7 +15,8 @@ const store = createStore({
 			userName: "",
 			phone: "",
 			avatar: "",
-			gender: 0
+			gender: 0,
+			shopId: 0
 		}
 	},
 	mutations: {
@@ -32,6 +33,8 @@ const store = createStore({
 		},
 		async setUserInfo({ commit }) {
 			const { data } = await StaffService.getCurrentStaff()
+			// debugger
+			console.warn('setUserInfo', data)
 			if (data) {
 				commit('SET_USER_INFO', data)
 			}

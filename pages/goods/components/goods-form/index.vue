@@ -10,8 +10,8 @@ const props = defineProps({
 
 const formData = defineModel({
     name: "",
-    referencePrice: 0,
-    thumbnail: "",
+    estimatedPrice: 0,
+    imageUrl: "",
     unit: ""
 })
 </script>
@@ -20,14 +20,14 @@ const formData = defineModel({
   <view class="goods-form">
     <uni-forms
       ref="form"
-      label-width="120"
+      :label-width="120"
     >
       <uni-forms-item
         required
         label="商品图片"
       >
       <uni-file-picker
-        v-model="formData.thumbnail"
+        v-model="formData.imageUrl"
         :limit="9"
         file-mediatype="image"
       />
@@ -48,7 +48,7 @@ const formData = defineModel({
       >
         <view class="uni-forms-item-content">
           <uni-number-box
-            v-model="formData.referencePrice"
+            v-model="formData.estimatedPrice"
           />
           <text>元(¥)</text>
         </view>

@@ -1,46 +1,98 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import GoodsList from "../goods/components/goods-list/index.vue";
 import GoodsForm from "../goods/components/goods-form/index.vue";
 import GoodsCard from "../goods/components/goods-card/index.vue";
+import SupplierCard from "./components/supplier/supplier-card.vue";
+import SupplierForm from "./components/supplier/supplier-form.vue";
 import { mockGoodsList } from "../../services/mock";
+import { SupplierService } from "../../services/supplier";
+import { PurchaseService } from "../../services/purchase";
+import { ProductService } from "../../services/product";
 
 const store = useStore();
 const navbarInfo = computed(() => store.getters.navbarInfo);
+const userInfo = computed(() => store.getters.userInfo);
 
 const orderDateTime = ref("");
+const supplierName = ref("");
 const goodsPopup = ref(null);
-const goodsList = ref(mockGoodsList);
+const goodsSearchParams = ref({
+  name: "",
+  pageNum: 1,
+  pageSize: 10
+})
+const goodsList = ref([]);
 const selectedGoodsList = ref([]);
 const purchaseGoodsList = ref([]);
-const searchText = ref("");
 const goodsFormPopup = ref(null);
 const goodsFormData = ref({
   name: "",
-  referencePrice: 0,
-  thumbnail: "",
+  estimatedPrice: 0,
+  imageUrl: "",
   unit: "",
 });
 const purchasePrice = ref(0)
+const supplierPopup = ref(null);
+const suppliersSearchParams = ref({
+  name: "",
+  contactPerson: "",
+  pageNum: 1,
+  pageSize: 10
+});
+const supplierList = ref([]);
+const purchaseParams = ref({
+  shopId: 0,
+  supplierId: 0,
+  items: []
+})
+const supplierFormPopup = ref(null);
+const supplierFormData = ref({
+  name: "",
+  contactPerson: "",
+  phone: "",
+  address: "",
+})
 const allGoodsRefrencePrice = computed(() => {
-  return purchaseGoodsList.value.reduce((total, item) => total + item.referencePrice * item.count, 0);
+  return purchaseGoodsList.value.reduce((total, item) => total + item.estimatedPrice * item.count, 0);
 })
 
-const onSupplierSelect = () => {};
-const onGoodsSelect = () => {
+const onSupplierSelect = async () => {
+  supplierPopup.value.open();
+}
+const onSupplierPopupClose = () => {
+
+  supplierPopup.value.close();
+}
+const onSuppliersSearch = async () => {
+  const { data = {} } = await SupplierService.getSuppliersByParams(suppliersSearchParams.value)
+  supplierList.value = data.list || []
+};
+const onSupplierSelectedChange = (supplier) => {
+  supplierName.value = supplier.name;
+  purchaseParams.supplierId = supplier.id;
+  supplierPopup.value.close();
+};
+const toSupplierForm = () => {
+  supplierFormPopup.value.onPopupOpen();
+}
+const onSupplierFormConfirm = async () => {
+  await SupplierService.createSupplier(supplierFormData.value);
+  onSuppliersSearch();
+  supplierFormPopup.value.onPopupClose();
+}
+const onGoodsSelect = async () => {
+  await onGoodsSearch();
   goodsPopup.value.onPopupOpen();
 };
-const onGoodsPopupClose = () => {
-  goodsPopup.value.onPopupClose();
+const onGoodsSearch = async () => {
+  const { data = {} } = await ProductService.getProductList(goodsSearchParams.value)
+  goodsList.value = data.list || [];
 };
-const onGoodsSelectPopupReset = () => {
-  searchText.value = "";
-}
 const onGoodsSelectedChange = (list) => {
   selectedGoodsList.value = (list || []).filter((item) => item.count > 0);
 };
-const onSearchConfirm = () => {};
 const onGoodsSelectConfirm = () => {
   purchaseGoodsList.value = selectedGoodsList.value;
   goodsPopup.value.onPopupClose();
@@ -61,8 +113,8 @@ const toGoodsForm = () => {
 const resetGoodsAdd = () => {
   goodsFormData.value = {
     name: "",
-    referencePrice: 0,
-    thumbnail: "",
+    estimatedPrice: 0,
+    imageUrl: "",
     unit: "",
   }
 }
@@ -78,9 +130,26 @@ const onGoodsFormConfirm = () => {
 const onPurchaseFormCancel = () => {
   uni.navigateBack({ delta: 1 });
 };
-const onPurchaseFormConfirm = () => {
+const onPurchaseFormConfirm = async () => {
+  const items = purchaseGoodsList.value.map(item => {
+    return {
+      productId: item.id,
+      quantity: item.count
+    }
+  })
+  const params = {
+    supplierId: purchaseParams.supplierId,
+    items,
+    shopId: userInfo.value.shopId
+  }
+
+  await PurchaseService.createPurchase(params);
   // TODO: 表单校验
 };
+
+onMounted(async () => {
+  await onSuppliersSearch();
+})
 </script>
 
 <template>
@@ -99,7 +168,7 @@ const onPurchaseFormConfirm = () => {
         <view class="purchase-form-item">
           <view class="purchase-form-item-label">供应商</view>
           <view class="purchase-form-item-select" @click="onSupplierSelect">
-            <view class="purchase-form-item-select-text"></view>
+            <view class="purchase-form-item-select-text">{{ supplierName }}</view>
             <uni-icons type="right" size="12" />
           </view>
         </view>
@@ -146,10 +215,6 @@ const onPurchaseFormConfirm = () => {
         <view class="purchase-form-footer-confirm" @click="onPurchaseFormConfirm">确认</view>
       </view>
     </view>
-    <view class="supplier-popup">
-      <uni-popup ref="supplierPopup" type="bottom" :safe-area="false">
-      </uni-popup>
-    </view>
     <fullscreen-popup
       ref="goodsPopup"
       title="选择商品"
@@ -158,10 +223,10 @@ const onPurchaseFormConfirm = () => {
         <view class="goods-content">
           <view class="goods-content-search">
             <uni-search-bar
-              v-model="searchText"
+              v-model="goodsSearchParams.name"
               placeholder="搜索商品"
               cancelButton="none"
-              @confirm="onSearchConfirm"
+              @confirm="onGoodsSearch"
             />
           </view>
           <GoodsList
@@ -202,6 +267,58 @@ const onPurchaseFormConfirm = () => {
         </view>
       </template>
     </fullscreen-popup>
+    <uni-popup
+      ref="supplierPopup"
+      type="bottom"
+      :safe-area="false"
+    >
+      <view class="supplier-popup">
+        <view class="supplier-popup-header">
+          <view class="supplier-popup-header-title">
+            <text>选择供应商</text>
+            <view class="supplier-popup-header-add" @click="toSupplierForm">
+              <uni-icons type="plus" size="24" />
+            </view>
+          </view>
+          <view class="supplier-popup-header-close" @click="onSupplierPopupClose">
+            <uni-icons type="closeempty" size="24" />
+          </view>
+        </view>
+        <view class="supplier-content">
+          <view class="supplier-content-search">
+            <uni-search-bar
+              v-model="suppliersSearchParams.name"
+              placeholder="搜索供应商"
+              cancelButton="none"
+              @confirm="onSuppliersSearch"
+            />
+          </view>
+          <view class="supplier-content-list">
+            <SupplierCard
+              v-for="item in supplierList"
+              :key="item.id"
+              :supplier="item"
+              @select-supplier="onSupplierSelectedChange"
+            />
+          </view>
+        </view>
+      </view>
+    </uni-popup>
+    <fullscreen-popup
+      ref="supplierFormPopup"
+      title="新建供应商"
+      @close="resetSupplierAdd"
+    >
+      <template #content>
+        <SupplierForm v-model="supplierFormData" />
+      </template>
+      <template #footer>
+        <view class="supplier-add-handles">
+          <view class="supplier-add-handles-cancel" @click="onSupplierFormCancel">取消</view>
+          <view class="supplier-add-handles-confirm" @click="onSupplierFormConfirm">保存</view>
+        </view>
+      </template>
+    </fullscreen-popup>
   </view>
 </template>
 
@@ -211,6 +328,50 @@ const onPurchaseFormConfirm = () => {
   flex-direction: column;
   min-height: 100vh;
   box-sizing: border-box;
+}
+
+.supplier-popup {
+  padding-bottom: env(safe-area-inset-bottom);
+  box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  width: 100vw;
+  z-index: 999;
+}
+
+.supplier-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 0.5px solid #eee;
+}
+
+.supplier-popup-header-title {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.supplier-popup-header-add {
+  margin-left: 12px;
+}
+
+.supplier-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.supplier-content-list {
+  flex: 1;
+  overflow-y: scroll;
+  background-color: #f5f5f5;
+  padding: 10px;
 }
 
 .purchase-form {
@@ -278,10 +439,22 @@ const onPurchaseFormConfirm = () => {
 
 .purchase-form-item-select {
   display: flex;
+  flex: 1;
   align-items: center;
   height: 35px;
   line-height: 35px;
   font-size: 12px;
+  color: #333;
+}
+
+.purchase-form-item-select-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 12px;
+  text-align: right;
+  font-size: 14px;
   color: #333;
 }
 

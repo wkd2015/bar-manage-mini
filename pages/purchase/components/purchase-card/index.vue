@@ -14,13 +14,13 @@ const props = defineProps({
         id: "",
       },
       status: "",
-      thumbnail: "",
+      imageUrl: "",
       goodsList: [
         {
           name: "",
           price: 0,
           unit: "",
-          thumbnail: "",
+          imageUrl: "",
           count: 0,
         },
       ],
@@ -59,7 +59,7 @@ const toPurchaseDetail = () => {
         <view class="card-content-goods-single">
           <image
             class="card-content-thumbnail"
-            :src="purchaseParams.goodsList[0].thumbnail"
+            :src="purchaseParams.goodsList[0].imageUrl"
           />
           <view class="card-content-info">
             <text class="card-content-info-text"
@@ -86,7 +86,7 @@ const toPurchaseDetail = () => {
                 <view class="card-content-goods-list-item-thumbnail-wrapper">
                   <image
                     class="card-content-goods-list-item-thumbnail"
-                    :src="item.thumbnail"
+                    :src="item.imageUrl"
                   />
                   <view
                     class="card-content-goods-list-item-thumbnail-wrapper-count"

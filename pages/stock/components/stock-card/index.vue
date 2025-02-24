@@ -6,7 +6,7 @@ const props = defineProps({
     type: Object,
     default: {
       id: '',
-      thumbnail: '',
+      imageUrl: '',
       name: '',
       stockNum: 0,
       openedNum: 0,
@@ -23,7 +23,7 @@ const emits = defineEmits(['open', 'in-stock', 'out-stock'])
   <view class="stock-card">
     <view class="stock-card-top">
       <view class="stock-card-thumbnail">
-        <image class="stock-card-thumbnail-image" :src="stockInfo.thumbnail" />
+        <image class="stock-card-thumbnail-image" :src="stockInfo.imageUrl" />
       </view>
       <view class="stock-card-info">
         <view class="stock-card-info-goods">

@@ -6,7 +6,8 @@ const formData = defineModel({
     userName: "",
     phone: "",
     avatar: "",
-    gender: 0
+    gender: 0,
+    shopId: 0
 })
 const genderList = ref([
   {

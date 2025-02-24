@@ -2,7 +2,7 @@ import request from "./request"
 
 const baseUrl = '/api/product'
 
-export class ProductClass {
+export class ProductService {
   static async createProduct(data) {
     return request({
       path: `${baseUrl}/create`,
