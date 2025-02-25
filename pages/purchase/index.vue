@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
-import purchaseCard from "./components/purchase-card/index.vue";
+import PurchaseCard from "./components/purchase-card/index.vue";
 import {PurchaseService} from "../../services/purchase";
 
 import { mockPurchaseList } from "../../services/mock";
@@ -18,9 +18,9 @@ const navbarInfo = computed(() => store.getters.navbarInfo);
 const purchaseList = ref([]);
 
 const getPurchaseList = async () => {
-  const res = await PurchaseService.getPurchaseList({})
-  console.warn(res)
-  purchaseList.value = res.data || []
+  const {data = {}} = await PurchaseService.getPurchaseList({})
+  // console.warn(res)
+  purchaseList.value = data.list || []
 }
 
 const onPurchaseCreate = () => {
@@ -48,9 +48,9 @@ onMounted(async () => {
         class="scroll-view-container"
       >
         <view class="purchase-list-container">
-          <purchaseCard
+          <PurchaseCard
             :purchaseParams="item"
-            v-for="item in mockPurchaseList"
+            v-for="item in purchaseList"
             :key="item.id"
           />
         </view>

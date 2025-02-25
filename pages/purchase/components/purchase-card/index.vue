@@ -1,4 +1,5 @@
 <script setup>
+import dayjs from "dayjs";
 import {
   PURCHASE_STATUS,
   PURCHASE_STATUS_MAP,
@@ -15,7 +16,7 @@ const props = defineProps({
       },
       status: "",
       imageUrl: "",
-      goodsList: [
+      items: [
         {
           name: "",
           price: 0,
@@ -40,7 +41,7 @@ const toPurchaseDetail = () => {
 <template>
   <view class="purchase-card">
     <view class="card-title" @click="toPurchaseDetail">
-      <text class="card-title-text">{{ purchaseParams.supplier.name }}</text>
+      <text class="card-title-text">{{ purchaseParams.supplier?.name }}</text>
       <text
         class="card-title-status"
         :style="{
@@ -50,26 +51,26 @@ const toPurchaseDetail = () => {
       >
     </view>
     <view class="card-content" @click="toPurchaseDetail">
-      <template v-if="purchaseParams.goodsList.length === 0">
+      <template v-if="purchaseParams.items.length === 0">
         <text class="card-content-text card-content-text-error"
           >商品信息获取失败</text
         >
       </template>
-      <template v-if="purchaseParams.goodsList.length === 1">
+      <template v-if="purchaseParams.items.length === 1">
         <view class="card-content-goods-single">
           <image
             class="card-content-thumbnail"
-            :src="purchaseParams.goodsList[0].imageUrl"
+            :src="purchaseParams.items[0].productSnapshot?.imageUrl"
           />
           <view class="card-content-info">
             <text class="card-content-info-text"
-              >名称：{{ purchaseParams.goodsList[0].name }}</text
+              >名称：{{ purchaseParams.items[0].productSnapshot?.name }}</text
             >
             <text class="card-content-info-text"
-              >数量：{{ purchaseParams.goodsList[0].count }}</text
+              >数量：{{ purchaseParams.items[0].quantity }}</text
             >
             <text class="card-content-info-text"
-              >总价：￥{{ purchaseParams.totalPrice }}</text
+              >总价：￥{{ purchaseParams.totalAmount }}</text
             >
           </view>
         </view>
@@ -80,24 +81,24 @@ const toPurchaseDetail = () => {
             <view class="card-content-goods-list">
               <view
                 class="card-content-goods-list-item"
-                v-for="item in purchaseParams.goodsList"
+                v-for="item in purchaseParams.items"
                 :key="item.id"
               >
                 <view class="card-content-goods-list-item-thumbnail-wrapper">
                   <image
                     class="card-content-goods-list-item-thumbnail"
-                    :src="item.imageUrl"
+                    :src="item.productSnapshot?.imageUrl"
                   />
                   <view
                     class="card-content-goods-list-item-thumbnail-wrapper-count"
-                    v-if="item.count > 1"
+                    v-if="item.quantity > 1"
                   >
-                    x {{ item.count }}
+                    x {{ item.quantity }}
                   </view>
                 </view>
                 <!-- 商品数量放在图片上 -->
                 <text class="card-content-goods-list-item-name">{{
-                  item.name
+                  item.productSnapshot?.name
                 }}</text>
               </view>
             </view>
@@ -105,17 +106,17 @@ const toPurchaseDetail = () => {
           </scroll-view>
           <view class="card-content-goods-total">
             <text class="card-content-goods-total-text-price"
-              >￥{{ purchaseParams.totalPrice }}</text
+              >￥{{ purchaseParams.totalAmount }}</text
             >
             <text class="card-content-goods-total-text"
-              >共{{ purchaseParams.goodsList.length }}件</text
+              >共{{ purchaseParams.items.length }}件</text
             >
           </view>
         </view>
       </template>
     </view>
     <text class="card-footer-text"
-      >采购时间：{{ purchaseParams.createTime }}</text
+      >采购时间：{{ dayjs(purchaseParams.createTime).format("YYYY-MM-DD") }}</text
     >
     <view class="card-footer">
       <view class="card-footer-more">更多</view>
