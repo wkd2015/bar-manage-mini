@@ -1,9 +1,10 @@
 <script setup>
 import dayjs from "dayjs";
 import {
-  PURCHASE_STATUS,
-  PURCHASE_STATUS_MAP,
+  getPurchaseStatus,
+  PURCHASE_STATUS
 } from "../../../../constants/purchase";
+import { computed } from "vue";
 
 const props = defineProps({
   purchaseParams: {
@@ -31,6 +32,8 @@ const props = defineProps({
   },
 });
 
+const statusInfo = computed(() => getPurchaseStatus(props.purchaseParams));
+
 const toPurchaseDetail = () => {
   uni.navigateTo({
     url: '/pages/purchase/detail?id=' + props.purchaseParams.id
@@ -45,9 +48,9 @@ const toPurchaseDetail = () => {
       <text
         class="card-title-status"
         :style="{
-          color: PURCHASE_STATUS_MAP[purchaseParams.status || 0].color,
+          color: statusInfo.color,
         }"
-        >{{ PURCHASE_STATUS_MAP[purchaseParams.status || 0].label }}</text
+        >{{ statusInfo.label }}</text
       >
     </view>
     <view class="card-content" @click="toPurchaseDetail">
@@ -226,6 +229,13 @@ const toPurchaseDetail = () => {
 .card-content-goods-list-item-thumbnail {
   width: 80px;
   height: 80px;
+}
+
+.card-content-goods-list-item-name {
+  width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card-content-goods-total {
