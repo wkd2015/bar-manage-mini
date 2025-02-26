@@ -30,5 +30,8 @@ store.dispatch("setUserInfo").then(() => {
   color: #f5f5f5;
   writing-mode: vertical-lr;
   font-size: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

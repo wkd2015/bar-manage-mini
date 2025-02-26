@@ -1,10 +1,13 @@
 <script setup>
+import { computed, ref } from "vue";
+import { useStore } from "vuex";
 import dayjs from "dayjs";
 import {
   getPurchaseStatus,
-  PURCHASE_STATUS
+  PURCHASE_STATUS,
 } from "../../../../constants/purchase";
-import { computed } from "vue";
+
+const store = useStore();
 
 const props = defineProps({
   purchaseParams: {
@@ -26,18 +29,55 @@ const props = defineProps({
           count: 0,
         },
       ],
-      totalPrice: 0,
+      totalAmount: 0,
       createTime: "",
     }),
   },
 });
 
+const signaturePopupVisible = ref(false);
+const signaturePopup = ref(null);
+const signatureRef = ref(null);
 const statusInfo = computed(() => getPurchaseStatus(props.purchaseParams));
+const userInfo = computed(() => store.getters.userInfo);
+const operationRole = computed(() =>
+  ["SUPER_ADMIN", "OPERATION"].some((item) => userInfo.value.roles?.includes(item))
+);
+const purchaseRole = computed(() =>
+  ["SUPER_ADMIN", "PURCHASE"].some((item) => userInfo.value.roles?.includes(item))
+);
 
 const toPurchaseDetail = () => {
   uni.navigateTo({
-    url: '/pages/purchase/detail?id=' + props.purchaseParams.id
-  })
+    url: "/pages/purchase/detail?id=" + props.purchaseParams.id,
+  });
+};
+
+const onSignaturePopupClose = () => {
+  signaturePopup.value.close();
+}
+
+const onSignaturePopupChange = (e) => {
+  signaturePopupVisible.value = e.show;
+  if (!e.show) {
+    signatureRef.value.clear();
+  }
+}
+
+const onSignatureConfirm = () => {
+  signaturePopup.value.close();
+}
+
+const onSignatureClear = () => {
+  signaturePopup.value.close();
+}
+
+const onSignatureUndo = () => {
+  signatureRef.value.undo();
+}
+
+const onPurchaseOrderConfirm = () => {
+  signaturePopup.value.open();
 }
 </script>
 
@@ -119,21 +159,47 @@ const toPurchaseDetail = () => {
       </template>
     </view>
     <text class="card-footer-text"
-      >采购时间：{{ dayjs(purchaseParams.createTime).format("YYYY-MM-DD") }}</text
+      >采购时间：{{
+        dayjs(purchaseParams.createTime).format("YYYY-MM-DD")
+      }}</text
     >
     <view class="card-footer">
       <view class="card-footer-more">更多</view>
       <view class="card-footer-handles">
         <view
           class="card-footer-handle-item"
-          v-if="purchaseParams.status === PURCHASE_STATUS.WAIT_PURCHASE_CONFIRM"
+          v-if="purchaseParams.status === PURCHASE_STATUS.INIT && operationRole"
+          @click="onPurchaseOrderConfirm"
+        >
+          确认采购单(签字)
+        </view>
+        <view
+          class="card-footer-handle-item"
+          v-if="
+            purchaseParams.status === PURCHASE_STATUS.PURCHASING && purchaseRole
+          "
           >上传发货单</view
         >
         <view
           class="card-footer-handle-item"
-          v-if="purchaseParams.status === PURCHASE_STATUS.WAIT_IN_STORAGE"
-          >确认入库</view
+          v-if="
+            purchaseParams.status === PURCHASE_STATUS.DELIVERED &&
+            purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.UNPAID &&
+            operationRole
+          "
         >
+          确认付款(签字)
+        </view>
+        <view
+          class="card-footer-handle-item"
+          v-if="
+            purchaseParams.status === PURCHASE_STATUS.DELIVERED &&
+            purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID &&
+            operationRole
+          "
+        >
+          确认入库(签字)
+        </view>
         <view
           class="card-footer-handle-item"
           v-if="purchaseParams.status === PURCHASE_STATUS.IN_STORAGE"
@@ -143,10 +209,84 @@ const toPurchaseDetail = () => {
         <view class="card-footer-handle-item">上传发票</view>
       </view>
     </view>
+    <uni-popup ref="signaturePopup" type="bottom" :safe-area="false" @change="onSignaturePopupChange">
+      <view class="signature-popup">
+        <view class="signature-popup-header">
+          <view class="signature-popup-header-title">签字</view>
+          <view class="signature-popup-header-close" @click="onSignaturePopupClose">
+            <uni-icons type="closeempty" size="16" />
+          </view>
+        </view>
+        <l-signature disableScroll ref="signatureRef" :landscape="true" backgroundColor="#dfe2e5" style="margin: 0 10px;" v-if="signaturePopupVisible" />
+        <view class="signature-popup-handle">
+          <view class="signature-popup-handle-clear" @click="onSignatureClear">清空</view>
+          <view class="signature-popup-handle-undo" @click="onSignatureUndo">撤销</view>
+          <view class="signature-popup-handle-confirm" @click="onSignatureConfirm">确认</view>
+        </view>
+      </view>
+    </uni-popup>
   </view>
 </template>
 
 <style scoped>
+.signature-popup {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 10px 10px 0 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100vw;
+}
+
+.signature-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 0.5px solid #eee;
+  margin-bottom: 10px;
+}
+
+.signature-popup-header-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.signature-popup-handle {
+  display: flex;
+  margin-top: 10px;
+  padding: 0 10px 10px 10px;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.signature-popup-handle > view {
+  flex: 1;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: 6px;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+.signature-popup-handle-clear {
+  background-color: #e43d33;
+}
+
+.signature-popup-handle-undo {
+  background-color: #f3a73f;
+}
+
+.signature-popup-handle-confirm {
+  background-color: #007aff;
+}
+
 .purchase-card {
   display: flex;
   flex-direction: column;

@@ -5,9 +5,9 @@ import { useStore } from "vuex";
 import { PURCHASE_STATUS_MAP } from "../../constants/purchase";
 
 const store = useStore();
-const statusOptions = Object.values(PURCHASE_STATUS_MAP).map((item) => ({
-  title: item.label
-}));
+// const statusOptions = Object.values(PURCHASE_STATUS_MAP).map((item) => ({
+//   title: item.label
+// }));
 
 const navbarInfo = computed(() => store.getters.navbarInfo);
 
@@ -28,11 +28,11 @@ onLoad(async (option) => {
     <navbar title="采购详情" class="navbar" showNavBack :onNavClick="onNavClick"></navbar>
     <view class="purchase-detail-content">
       <view class="purchase-status">
-        <uni-steps
+        <!-- <uni-steps
           :options="statusOptions"
           :active="2"
           direction="column"
-        />
+        /> -->
       </view>
       <view class="purchase-info"></view>
       <view class="purchase-goods"></view>
