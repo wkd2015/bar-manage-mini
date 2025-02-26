@@ -14,7 +14,9 @@ export class PurchaseService {
     return request({
       path: `${baseUrl}/${data.id}/confirm`,
       method: 'POST',
-      data
+      data: {
+        signature: data.signature
+      }
     })
   }
   static async confirmPurchasePayment(data) {

@@ -6,6 +6,7 @@ import {
   getPurchaseStatus,
   PURCHASE_STATUS,
 } from "../../../../constants/purchase";
+import { PurchaseService } from "../../../../services/purchase";
 
 const store = useStore();
 
@@ -14,6 +15,7 @@ const props = defineProps({
     type: Object,
     default: () => ({
       id: "",
+      orderNo: "",
       supplier: {
         name: "",
         id: "",
@@ -38,6 +40,7 @@ const props = defineProps({
 const signaturePopupVisible = ref(false);
 const signaturePopup = ref(null);
 const signatureRef = ref(null);
+// const signature
 const statusInfo = computed(() => getPurchaseStatus(props.purchaseParams));
 const userInfo = computed(() => store.getters.userInfo);
 const operationRole = computed(() =>
@@ -65,11 +68,31 @@ const onSignaturePopupChange = (e) => {
 }
 
 const onSignatureConfirm = () => {
-  signaturePopup.value.close();
+  signatureRef.value.canvasToTempFilePath({
+    success: (res) => {
+      if (res.tempFilePath) {
+        wx.cloud.uploadFile({
+          cloudPath: `signature/${props.purchaseParams.orderNo}.png`,
+          filePath: res.tempFilePath,
+          config: {
+            env: "prod-0glco3k7aad42178"
+          },
+          success: async (res) => {
+            const { fileID = '' } = res || {};
+            await PurchaseService.confirmPurchase({
+              id: props.purchaseParams.id,
+              signature: fileID
+            })
+            signaturePopup.value.close();
+          }
+        })
+      }
+    }
+  })
 }
 
 const onSignatureClear = () => {
-  signaturePopup.value.close();
+  signatureRef.value.clear();
 }
 
 const onSignatureUndo = () => {
@@ -84,7 +107,7 @@ const onPurchaseOrderConfirm = () => {
 <template>
   <view class="purchase-card">
     <view class="card-title" @click="toPurchaseDetail">
-      <text class="card-title-text">{{ purchaseParams.supplier?.name }}</text>
+      <text class="card-title-text">{{ purchaseParams.supplierInfo?.name }}</text>
       <text
         class="card-title-status"
         :style="{
