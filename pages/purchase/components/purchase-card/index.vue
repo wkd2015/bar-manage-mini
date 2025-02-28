@@ -4,6 +4,7 @@ import { useStore } from "vuex";
 import dayjs from "dayjs";
 import {
   getPurchaseStatus,
+  PURCHASE_PAYMENT_STATUS,
   PURCHASE_STATUS,
 } from "../../../../constants/purchase";
 import { PurchaseService } from "../../../../services/purchase";
@@ -36,6 +37,7 @@ const props = defineProps({
     }),
   },
 });
+const emit = defineEmits(["order-status-change"]);
 
 const signaturePopupVisible = ref(false);
 const signaturePopup = ref(null);
@@ -49,6 +51,33 @@ const operationRole = computed(() =>
 const purchaseRole = computed(() =>
   ["SUPER_ADMIN", "PURCHASE"].some((item) => userInfo.value.roles?.includes(item))
 );
+
+const OPERATION_TYPE = {
+  PURCHASE_CONFIRM: 1,
+  PAYMENT_CONFIRM: 2,
+  DELIVERED_CONFIRM: 3,
+  RECIEVED_CONFIRM: 4
+}
+
+const currentOperationType = computed(() => {
+  if (props.purchaseParams.status === PURCHASE_STATUS.INIT) {
+    return OPERATION_TYPE.PURCHASE_CONFIRM;
+  }
+
+  if (props.purchaseParams.status === PURCHASE_STATUS.PURCHASING && props.purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.UNPAID) {
+    return OPERATION_TYPE.PAYMENT_CONFIRM;
+  }
+
+  if (props.purchaseParams.status === PURCHASE_STATUS.PURCHASING && props.purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID) {
+    return OPERATION_TYPE.DELIVERED_CONFIRM;
+  }
+
+  if (props.purchaseParams.status === PURCHASE_STATUS.DELIVERED && props.purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID) {
+    return OPERATION_TYPE.RECIEVED_CONFIRM;
+  }
+
+  return 0
+})
 
 const toPurchaseDetail = () => {
   uni.navigateTo({
@@ -79,14 +108,55 @@ const onSignatureConfirm = () => {
           },
           success: async (res) => {
             const { fileID = '' } = res || {};
-            await PurchaseService.confirmPurchase({
-              id: props.purchaseParams.id,
-              signature: fileID
-            })
+            if (currentOperationType.value === OPERATION_TYPE.PURCHASE_CONFIRM) {
+              await PurchaseService.confirmPurchase({
+                id: props.purchaseParams.id,
+                signature: fileID,
+                totalAmount: props.purchaseParams.totalAmount
+              });
+            }
+            if (currentOperationType.value === OPERATION_TYPE.PAYMENT_CONFIRM) {
+              await PurchaseService.confirmPurchasePayment({
+                id: props.purchaseParams.id,
+                signature: fileID,
+              });
+            }
             signaturePopup.value.close();
+            emit("order-status-change")
           }
         })
       }
+    }
+  })
+}
+
+const onOrderDeliveredConfirm = () => {
+  wx.chooseMessageFile({
+    count: 9,
+    type: "all",
+    success: (res) => {
+      console.warn(res)
+      const tempFiles = res.tempFiles || [];
+      const uploadTasks = tempFiles.map((item) => {
+        return wx.cloud.uploadFile({
+          cloudPath: `delivery-note/${props.purchaseParams.orderNo}/${item.name}`,
+          filePath: item.path,
+          config: {
+            env: "prod-0glco3k7aad42178"
+          },
+        })
+      });
+      console.warn(uploadTasks)
+      Promise.all(uploadTasks).then((res) => {
+        const fileIds = (res || []).map((item) => item.fileID);
+        console.warn(999, fileIds)
+        PurchaseService.confirmPurchaseDelivery({
+          id: props.purchaseParams.id,
+          fileIds,
+          signature: ""
+        });
+        emit("order-status-change")
+      })
     }
   })
 }
@@ -100,6 +170,10 @@ const onSignatureUndo = () => {
 }
 
 const onPurchaseOrderConfirm = () => {
+  signaturePopup.value.open();
+}
+
+const onOrderPaymentConfirm = () => {
   signaturePopup.value.open();
 }
 </script>
@@ -191,37 +265,30 @@ const onPurchaseOrderConfirm = () => {
       <view class="card-footer-handles">
         <view
           class="card-footer-handle-item"
-          v-if="purchaseParams.status === PURCHASE_STATUS.INIT && operationRole"
+          v-if="currentOperationType === OPERATION_TYPE.PURCHASE_CONFIRM && operationRole"
           @click="onPurchaseOrderConfirm"
         >
-          确认采购单(签字)
+          确认采购单
         </view>
         <view
           class="card-footer-handle-item"
-          v-if="
-            purchaseParams.status === PURCHASE_STATUS.PURCHASING && purchaseRole
-          "
-          >上传发货单</view
+          v-if="currentOperationType === OPERATION_TYPE.PAYMENT_CONFIRM && purchaseRole"
+          @click="onOrderPaymentConfirm"
         >
-        <view
-          class="card-footer-handle-item"
-          v-if="
-            purchaseParams.status === PURCHASE_STATUS.DELIVERED &&
-            purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.UNPAID &&
-            operationRole
-          "
-        >
-          确认付款(签字)
+          确认付款
         </view>
         <view
           class="card-footer-handle-item"
-          v-if="
-            purchaseParams.status === PURCHASE_STATUS.DELIVERED &&
-            purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID &&
-            operationRole
-          "
+          v-if="currentOperationType === OPERATION_TYPE.DELIVERED_CONFIRM && operationRole"
+          @click="onOrderDeliveredConfirm"
         >
-          确认入库(签字)
+          上传发货单
+        </view>
+        <view
+          class="card-footer-handle-item"
+          v-if="currentOperationType === OPERATION_TYPE.RECIEVED_CONFIRM && operationRole"
+        >
+          确认收货
         </view>
         <view
           class="card-footer-handle-item"
@@ -252,6 +319,45 @@ const onPurchaseOrderConfirm = () => {
 </template>
 
 <style scoped>
+.delivery-upload-popup {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 10px 10px 0 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100vw;
+}
+
+.delivery-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 0.5px solid #eee;
+  margin-bottom: 10px;
+}
+
+.delivery-popup-header-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.delivery-popup-picker {
+  margin: -10px 10px 10px 10px;
+}
+.delivery-popup-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 0;
+  border-radius: 6px;
+  background-color: #18bc37;
+  color: #fff;
+}
+
 .signature-popup {
   display: flex;
   flex-direction: column;

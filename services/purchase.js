@@ -15,7 +15,9 @@ export class PurchaseService {
       path: `${baseUrl}/${data.id}/confirm`,
       method: 'POST',
       data: {
-        signature: data.signature
+        signature: data.signature,
+        paymentTerm: 1,
+        totalAmount: data.totalAmount
       }
     })
   }

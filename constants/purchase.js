@@ -24,15 +24,15 @@ export const getPurchaseStatus = (purchaseOrder) => {
       color: "#FFA500",
     }
   }
-  if (purchaseOrder.status === PURCHASE_STATUS.PURCHASING) {
+  if (purchaseOrder.status === PURCHASE_STATUS.PURCHASING && purchaseOrder.paymentStatus === PURCHASE_PAYMENT_STATUS.UNPAID) {
     return {
       label: "采购中",
       color: "#008000",
     }
   }
-  if (purchaseOrder.status === PURCHASE_STATUS.DELIVERED && purchaseOrder.paymentStatus === PURCHASE_PAYMENT_STATUS.UNPAID) {
+  if (purchaseOrder.status === PURCHASE_STATUS.PURCHASING && purchaseOrder.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID) {
     return {
-      label: "待付款",
+      label: "待发货",
       color: "#FFA500",
     }
   }

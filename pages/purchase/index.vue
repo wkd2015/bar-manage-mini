@@ -52,6 +52,7 @@ onMounted(async () => {
             :purchaseParams="item"
             v-for="item in purchaseList"
             :key="item.id"
+            @order-status-change="getPurchaseList"
           />
         </view>
         <uni-load-more :status="loadStatus" :content-text="contentText" />
