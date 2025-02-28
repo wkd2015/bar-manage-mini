@@ -121,6 +121,9 @@ const onSignatureConfirm = () => {
                 signature: fileID,
               });
             }
+            if (currentOperationType.value === OPERATION_TYPE.RECIEVED_CONFIRM) {
+              
+            }
             signaturePopup.value.close();
             emit("order-status-change")
           }
@@ -159,6 +162,10 @@ const onOrderDeliveredConfirm = () => {
       })
     }
   })
+}
+
+const onOrderReceivedConfirm = () => {
+  signaturePopup.value.open();
 }
 
 const onSignatureClear = () => {
@@ -287,6 +294,7 @@ const onOrderPaymentConfirm = () => {
         <view
           class="card-footer-handle-item"
           v-if="currentOperationType === OPERATION_TYPE.RECIEVED_CONFIRM && operationRole"
+          @click="onOrderReceivedConfirm"
         >
           确认收货
         </view>
