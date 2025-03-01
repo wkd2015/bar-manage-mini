@@ -31,7 +31,7 @@ const goodsFormData = ref({
   name: "",
   estimatedPrice: 0,
   imageUrl: "",
-  unit: "",
+  category: "",
 });
 const purchasePrice = ref(0)
 const supplierPopup = ref(null);
@@ -115,16 +115,19 @@ const resetGoodsAdd = () => {
     name: "",
     estimatedPrice: 0,
     imageUrl: "",
-    unit: "",
+    category: "",
   }
 }
 const onGoodsFormCancel = () => {
   resetGoodsAdd();
   goodsFormPopup.value.onPopupClose();
 };
-const onGoodsFormConfirm = () => {
+const onGoodsFormConfirm = async () => {
+  console.warn('goodsFormData.value', goodsFormData.value);
+  await ProductService.createProduct(goodsFormData.value);
   resetGoodsAdd();
   goodsFormPopup.value.onPopupClose();
+  await onGoodsSearch();
 };
 
 const onPurchaseFormCancel = () => {

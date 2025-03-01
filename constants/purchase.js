@@ -6,8 +6,9 @@ export const PURCHASE_STATUS = {
   // 上传发货单【付款 || 未付款】及主理人签字
   DELIVERED: 3,
   // 确认收货
-  // TODO: 入库与收货是否自动化
-  RECEIVED: 4
+  RECEIVED: 4,
+  // 入库
+  STOCKED: 5
 };
 
 export const PURCHASE_PAYMENT_STATUS = {
@@ -43,6 +44,12 @@ export const getPurchaseStatus = (purchaseOrder) => {
     }
   }
   if (purchaseOrder.status === PURCHASE_STATUS.RECEIVED) {
+    return {
+      label: "确认收货",
+      color: "#008000",
+    }
+  }
+  if (purchaseOrder.status === PURCHASE_STATUS.STOCKED) {
     return {
       label: "已入库",
       color: "#008000",

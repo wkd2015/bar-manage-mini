@@ -1,19 +1,59 @@
 <script setup>
-import { defineProps, defineModel } from 'vue';
-
-const props = defineProps({
-  id: {
-    type: String,
-    default: ''
-  }
-})
+import { defineModel, ref, watch } from 'vue';
 
 const formData = defineModel({
     name: "",
     estimatedPrice: 0,
     imageUrl: "",
-    unit: ""
+    category: ""
 })
+const renderImageUrl = ref([])
+
+const onImageSelect = (e) => {
+	const tempFilePaths = e.tempFilePaths
+  wx.cloud.uploadFile({
+    cloudPath: `goods/imgs/${formData.value.name}-${Date.now()}.png`,
+    filePath: tempFilePaths[0],
+    config: {
+      env: "prod-0glco3k7aad42178"
+    },
+    success: (res) => {
+      const { fileID = '' } = res || {};
+      wx.cloud.getTempFileURL({
+        fileList: [fileID],
+        success: (res) => {
+          renderImageUrl.value = [{
+            url: res.fileList[0].tempFileURL,
+            name: 'file',
+            extname: 'png'
+          }]
+        }
+      })
+    }
+  })
+}
+
+watch(() => formData.value.imageUrl, (newVal) => {
+  if (newVal) {
+    renderImageUrl.value = [{
+      url: newVal,
+      name: 'file',
+      extname: 'png'
+    }];
+  } else {
+    renderImageUrl.value = [];
+  }
+}, { immediate: true })
+
+watch(() => renderImageUrl.value, (newVal) => {
+  const latestUrl = newVal[0]?.url || ''
+  if(formData.value.imageUrl !== latestUrl) {
+    formData.value = {
+      ...formData.value,
+      imageUrl: latestUrl
+    }
+  }
+}, { deep: true })
 </script>
 
 <template>
@@ -27,9 +67,10 @@ const formData = defineModel({
         label="商品图片"
       >
       <uni-file-picker
-        v-model="formData.imageUrl"
-        :limit="9"
+        v-model="renderImageUrl"
+        :limit="1"
         file-mediatype="image"
+        @select="onImageSelect"
       />
       </uni-forms-item>
       <uni-forms-item
@@ -49,18 +90,20 @@ const formData = defineModel({
         <view class="uni-forms-item-content">
           <uni-number-box
             v-model="formData.estimatedPrice"
+            :min="0"
+            :max="99999"
           />
           <text>元(¥)</text>
         </view>
       </uni-forms-item>
       <uni-forms-item
         required
-        label="商品单位"
+        label="商品分类"
       >
         <uni-easyinput
-          v-model="formData.unit"
+          v-model="formData.category"
           type="text"
-          placeholder="请输入商品单位"
+          placeholder="请输入商品分类"
         />
       </uni-forms-item>
     </uni-forms>

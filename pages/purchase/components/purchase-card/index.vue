@@ -27,7 +27,7 @@ const props = defineProps({
         {
           name: "",
           price: 0,
-          unit: "",
+          category: "",
           imageUrl: "",
           count: 0,
         },
@@ -42,7 +42,7 @@ const emit = defineEmits(["order-status-change"]);
 const signaturePopupVisible = ref(false);
 const signaturePopup = ref(null);
 const signatureRef = ref(null);
-// const signature
+const orderStockPopup = ref(null);
 const statusInfo = computed(() => getPurchaseStatus(props.purchaseParams));
 const userInfo = computed(() => store.getters.userInfo);
 const operationRole = computed(() =>
@@ -56,7 +56,8 @@ const OPERATION_TYPE = {
   PURCHASE_CONFIRM: 1,
   PAYMENT_CONFIRM: 2,
   DELIVERED_CONFIRM: 3,
-  RECIEVED_CONFIRM: 4
+  RECIEVED_CONFIRM: 4,
+  STOCK_CONFIRM: 5
 }
 
 const currentOperationType = computed(() => {
@@ -74,6 +75,10 @@ const currentOperationType = computed(() => {
 
   if (props.purchaseParams.status === PURCHASE_STATUS.DELIVERED && props.purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID) {
     return OPERATION_TYPE.RECIEVED_CONFIRM;
+  }
+
+  if (props.purchaseParams.status === PURCHASE_STATUS.RECEIVED && props.purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID) {
+    return OPERATION_TYPE.STOCK_CONFIRM;
   }
 
   return 0
@@ -122,7 +127,15 @@ const onSignatureConfirm = () => {
               });
             }
             if (currentOperationType.value === OPERATION_TYPE.RECIEVED_CONFIRM) {
-              
+              console.warn(props.purchaseParams.id, fileID)
+              await PurchaseService.confirmPurchaseReceipt({
+                id: props.purchaseParams.id,
+                signature: fileID
+              });
+              await PurchaseService.confirmSettlement({
+                id: props.purchaseParams.id,
+                signature: fileID,
+              })
             }
             signaturePopup.value.close();
             emit("order-status-change")
@@ -162,6 +175,20 @@ const onOrderDeliveredConfirm = () => {
       })
     }
   })
+}
+
+const onOrderStockedConfirm = () => {
+  orderStockPopup.value.open();
+}
+
+const onOrderStockPopupClose = () => {
+  orderStockPopup.value.close();
+}
+
+const onOrderStockPopupConfirm = async () => {
+  await PurchaseService.confirmPurchaseStock([props.purchaseParams.id]);
+  orderStockPopup.value.close();
+  emit("order-status-change")
 }
 
 const onOrderReceivedConfirm = () => {
@@ -300,6 +327,13 @@ const onOrderPaymentConfirm = () => {
         </view>
         <view
           class="card-footer-handle-item"
+          v-if="currentOperationType === OPERATION_TYPE.STOCK_CONFIRM && operationRole"
+          @click="onOrderStockedConfirm"
+        >
+          订单入库
+        </view>
+        <view
+          class="card-footer-handle-item"
           v-if="purchaseParams.status === PURCHASE_STATUS.IN_STORAGE"
           >导出入库单</view
         >
@@ -323,10 +357,151 @@ const onOrderPaymentConfirm = () => {
         </view>
       </view>
     </uni-popup>
+    <uni-popup
+      ref="orderStockPopup"
+      type="bottom"
+      :safe-area="false"
+    >
+      <view class="order-stock-popup">
+        <view class="order-stock-popup-header">
+          <view class="order-stock-popup-header-title">入库</view>
+          <view class="order-stock-popup-header-close" @click="onOrderStockPopupClose">
+            <uni-icons type="closeempty" size="16" />
+          </view>
+        </view>
+        <view class="order-stock-popup-content">
+          <view class="order-stock-popup-content-item" v-for="item in purchaseParams.items" :key="item.id">
+            <view class="order-stock-popup-content-item-image">
+              <image :src="item.productSnapshot?.imageUrl" class="order-stock-popup-content-item-image-image" />
+            </view>
+            <view class="order-stock-popup-content-item-info">
+              <view class="order-stock-popup-content-item-info-name">
+                {{ item.productSnapshot?.name }}
+              </view>
+              <view class="order-stock-popup-content-item-info-price">
+                ￥{{ item.productSnapshot?.estimatedPrice }}
+              </view>
+            </view>
+            <view class="order-stock-popup-content-item-quantity">
+              *{{ item.quantity }}
+            </view>
+          </view>
+        </view>
+        <view class="order-stock-popup-handle">
+          <view class="order-stock-popup-handle-confirm" @click="onOrderStockPopupConfirm">
+            确认入库
+          </view>
+        </view>
+      </view>
+    </uni-popup>
   </view>
 </template>
 
 <style scoped>
+.order-stock-popup {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 10px 10px 0 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100vw;
+}
+
+.order-stock-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 0.5px solid #eee;
+  margin-bottom: 10px;
+}
+
+.order-stock-popup-header-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.order-stock-popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 10px 10px 10px;
+  box-sizing: border-box;
+  overflow-y: scroll;
+  max-height: 60vh;
+}
+
+.order-stock-popup-content-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: #f5f5f5;
+}
+
+.order-stock-popup-content-item-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #eee;
+}
+
+.order-stock-popup-content-item-image-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.order-stock-popup-content-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-left: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-stock-popup-content-item-info-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-stock-popup-content-item-info-price {
+  font-size: 12px;
+  color: #999;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-stock-popup-content-item-quantity {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.order-stock-popup-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 0;
+  border-radius: 6px;
+  background-color: #18bc37;
+  color: #fff;
+  margin: 0 10px 10px 10px;
+}
+
 .delivery-upload-popup {
   display: flex;
   flex-direction: column;

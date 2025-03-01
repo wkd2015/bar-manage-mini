@@ -23,9 +23,6 @@
           v-for="item in stockList"
           :key="item.id"
           :stock-info="item"
-          @open="openStockPopup"
-          @in-stock="handleInStock"
-          @out-stock="handleOutStock"
         />
       </view>
       <view class="stock-bottom">
@@ -92,15 +89,17 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import StockCard from "./components/stock-card/index.vue";
 import { mockStockList } from "../../services/mock";
+import { InventoryService } from "../../services/inventory";
 
 const store = useStore();
 const navbarInfo = computed(() => store.getters.navbarInfo);
+const userInfo = computed(() => store.getters.userInfo);
 
-const stockList = ref(mockStockList);
+const stockList = ref([]);
 const filterOpenStatusList = ref([
   {value: 0, text: "全部"},
   {value: 1, text: "已开封"},
@@ -133,6 +132,11 @@ const fabContentList = ref([
 const showFabContent = ref(true)
 const purchaseStockInPopup = ref(null);
 
+const getInventoryList = async () => {
+  const { data } = await InventoryService.getInventoryList(userInfo.value.shopId);
+  stockList.value = data || [];
+}
+
 const openFilterPopup = () => {
   filterPopup.value.open();
 }
@@ -163,6 +167,10 @@ const onFabContentClick = (clickFab) => {
 const onFabClick = () => {
   fabContentList.value = fabContentList.value.map((item) => Object.assign({}, item, {active: false}));
 }
+
+onMounted(async () => {
+  await getInventoryList();
+})
 </script>
 
 <style>

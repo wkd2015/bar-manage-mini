@@ -5,7 +5,7 @@ const baseUrl = '/api/product'
 export class ProductService {
   static async createProduct(data) {
     return request({
-      path: `${baseUrl}/create`,
+      path: `${baseUrl}`,
       method: 'POST',
       data
     })

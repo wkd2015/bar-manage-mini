@@ -12,7 +12,7 @@ const props = defineProps({
       name: "",
       estimatedPrice: 0,
       imageUrl: "",
-      unit: "",
+      category: "",
     }),
   },
 });
@@ -26,7 +26,7 @@ const screenWidth = computed(() => store.getters.navbarInfo.screenWidth);
     </view>
     <view class="goods-detail-info">
       <view class="goods-name">商品名称：{{ goods.name }}</view>
-      <view class="goods-unit">商品单位：{{ goods.unit }}</view>
+      <view class="goods-category">商品分类：{{ goods.category }}</view>
       <view class="goods-reference-price">参考价格：￥{{ goods.estimatedPrice }}</view>
     </view>
   </view>

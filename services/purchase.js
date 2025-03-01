@@ -38,7 +38,8 @@ export class PurchaseService {
   static async confirmPurchaseReceipt(data) {
     return request({
       path: `${baseUrl}/${data.id}/receipt`,
-      method: 'GET'
+      method: 'POST',
+      data
     })
   }
   static async confirmSettlement(data) {
@@ -72,6 +73,13 @@ export class PurchaseService {
     return request({
       path: `${baseUrl}/${id}/operations`,
       method: 'GET'
+    })
+  }
+  static async confirmPurchaseStock(data) {
+    return request({
+      path: `${baseUrl}/batch-stock`,
+      method: 'POST',
+      data
     })
   }
 }

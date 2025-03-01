@@ -1,5 +1,5 @@
 <script setup>
-import { defineEmits, defineProps } from 'vue'
+import { defineProps } from 'vue'
 
 const props = defineProps({
   stockInfo: {
@@ -8,15 +8,17 @@ const props = defineProps({
       id: '',
       imageUrl: '',
       name: '',
-      stockNum: 0,
-      openedNum: 0,
+      totalQuantity: 0,
+      usedQuantity: 0,
       price: 0,
-      unit: ''
+      category: ''
     }
   }
 })
 
-const emits = defineEmits(['open', 'in-stock', 'out-stock'])
+const onStockInOut = () => {
+  
+}
 </script>
 
 <template>
@@ -29,16 +31,16 @@ const emits = defineEmits(['open', 'in-stock', 'out-stock'])
         <view class="stock-card-info-goods">
           <view class="stock-card-info-name">商品名称：{{ stockInfo.name }}</view>
           <view class="stock-card-info-price">零售价格: ￥{{ stockInfo.price }}</view>
-          <view class="stock-card-info-unit">单位：{{ stockInfo.unit }}</view>
+          <view class="stock-card-info-category">分类：{{ stockInfo.category }}</view>
         </view>
         <view class="stock-card-info-stock">
           <uni-tag
-            :text="`库存： ${stockInfo.stockNum}`"
+            :text="`库存：${stockInfo.totalQuantity}`"
             size="small"
             type="primary"
           />
           <uni-tag
-            :text="`开封： ${stockInfo.openedNum}`"
+            :text="`开封：${stockInfo.usedQuantity}`"
             size="small"
             type="success"
           />
@@ -46,7 +48,7 @@ const emits = defineEmits(['open', 'in-stock', 'out-stock'])
       </view>
     </view>
     <view class="stock-card-bottom">
-      <view class="stock-card-bottom-button-in-out">入库/出库</view>
+      <view class="stock-card-bottom-button-in-out" @click="onStockInOut">入库/出库</view>
       <view class="stock-card-bottom-button-open">开封</view>
       <view class="stock-card-bottom-button-detail">查看详情</view>
     </view>
