@@ -52,6 +52,30 @@ const onStockInOut = () => {
       <view class="stock-card-bottom-button-open">开封</view>
       <view class="stock-card-bottom-button-detail">查看详情</view>
     </view>
+    <uni-popup ref="stockInOutPopup" type="bottom" :safe-area="false">
+      <view class="stock-in-out-popup">
+        <view class="stock-in-out-popup-header">
+          <view class="stock-in-out-popup-header-title">入库/出库</view>
+          <view class="stock-in-out-popup-header-close" @click="onStockInOutPopupClose">
+            <uni-icons type="closeempty" size="16" />
+          </view>
+        </view>
+        <view class="stock-in-out-popup-content">
+          <view class="stock-in-out-popup-content-item">
+            <text class="stock-in-out-popup-content-item-label">商品名称</text>
+            <text class="stock-in-out-popup-content-item-value">{{ stockInfo.name }}</text>
+          </view>
+          <view class="stock-in-out-popup-content-item">
+            <text class="stock-in-out-popup-content-item-label">数量</text>
+            <input class="stock-in-out-popup-content-item-input" />
+          </view>
+        </view>
+        <view class="stock-in-out-popup-footer">
+          <view class="stock-in-out-popup-footer-cancel">取消</view>
+          <view class="stock-in-out-popup-footer-confirm">确定</view>
+        </view>
+      </view>
+    </uni-popup>
   </view>
 </template>
 
