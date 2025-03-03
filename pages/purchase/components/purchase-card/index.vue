@@ -295,7 +295,7 @@ const onOrderPaymentConfirm = () => {
       }}</text
     >
     <view class="card-footer">
-      <view class="card-footer-more">更多</view>
+      <!-- <view class="card-footer-more">更多</view> -->
       <view class="card-footer-handles">
         <view
           class="card-footer-handle-item"
@@ -337,8 +337,8 @@ const onOrderPaymentConfirm = () => {
           v-if="purchaseParams.status === PURCHASE_STATUS.IN_STORAGE"
           >导出入库单</view
         >
-        <view class="card-footer-handle-item">导出采购单</view>
-        <view class="card-footer-handle-item">上传发票</view>
+        <!-- <view class="card-footer-handle-item">导出采购单</view>
+        <view class="card-footer-handle-item">上传发票</view> -->
       </view>
     </view>
     <uni-popup ref="signaturePopup" type="bottom" :safe-area="false" @change="onSignaturePopupChange">

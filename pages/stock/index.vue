@@ -23,12 +23,13 @@
           v-for="item in stockList"
           :key="item.id"
           :stock-info="item"
+          @stock-change="getInventoryList"
         />
       </view>
-      <view class="stock-bottom">
+      <!-- <view class="stock-bottom">
         <view class="stock-bottom-out" @click="openPurchaseStockInPopup">批量出库</view>
         <view class="stock-bottom-open" @click="openPurchaseStockOutPopup">批量开封</view>
-      </view>
+      </view> -->
     </view>
     <uni-popup
       ref="filterPopup"
@@ -76,7 +77,7 @@
         </view>
       </template>
     </fullscreen-popup>
-    <uni-fab
+    <!-- <uni-fab
       horizontal="right"
       vertical="bottom"
       direction="vertical"
@@ -84,7 +85,7 @@
       :popMenu="showFabContent"
       @trigger="onFabContentClick"
       @fabClick="onFabClick"
-    />
+    /> -->
   </view>
 </template>
 
