@@ -31,6 +31,14 @@ const onNavClick = () => {
   uni.navigateBack({ delta: 1 });
 }
 
+const getFormatedTime = (time) => {
+  if (time) {
+    return dayjs(time).format("YYYY-MM-DD HH:mm:ss")
+  } else {
+    return '-'
+  }
+}
+
 onLoad(async (option) => {
   console.warn(option);
   const id = option?.id || 0;
@@ -130,19 +138,19 @@ onLoad(async (option) => {
         </view>
         <view class="purchase-info-item">
           <view class="purchase-info-label">创建时间</view>
-          <view class="purchase-info-value">{{ dayjs(purchaseOrder.createdTime).format("YYYY-MM-DD HH:mm:ss") }}</view>
+          <view class="purchase-info-value">{{ getFormatedTime(purchaseOrder.createdTime) }}</view>
         </view>
         <view class="purchase-info-item">
           <view class="purchase-info-label">发货时间</view>
-          <view class="purchase-info-value">{{ dayjs(purchaseOrder.deliveryTime).format("YYYY-MM-DD HH:mm:ss") }}</view>
+          <view class="purchase-info-value">{{ getFormatedTime(purchaseOrder.deliveryTime) }}</view>
         </view>
         <view class="purchase-info-item">
           <view class="purchase-info-label">收货时间</view>
-          <view class="purchase-info-value">{{ dayjs(purchaseOrder.recievedTime).format("YYYY-MM-DD HH:mm:ss") }}</view>
+          <view class="purchase-info-value">{{ getFormatedTime(purchaseOrder.recievedTime) }}</view>
         </view>
         <view class="purchase-info-item">
           <view class="purchase-info-label">入库时间</view>
-          <view class="purchase-info-value">{{ dayjs(purchaseOrder.stockedTime).format("YYYY-MM-DD HH:mm:ss") }}</view>
+          <view class="purchase-info-value">{{ getFormatedTime(purchaseOrder.stockedTime) }}</view>
         </view>
       </view>
       <view class="purchase-footer"></view>
@@ -231,6 +239,67 @@ onLoad(async (option) => {
   display: flex;
   flex: 1;
   gap: 10px;
+}
+
+.purchase-goods-list-scroll {
+  width: 300px;
+}
+
+.purchase-goods-list {
+  display: flex;
+  gap: 10px;
+}
+
+.purchase-goods-list-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+.purchase-goods-list-item-thumbnail-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+}
+
+.purchase-goods-list-item-thumbnail-wrapper-count {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 0 5px 5px 0;
+}
+
+.purchase-goods-list-item-name {
+  width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.purchase-goods-total {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #666;
+}
+
+.purchase-goods-total-text-price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
 }
 
 .purchase-info {

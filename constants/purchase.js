@@ -54,7 +54,7 @@ export const getPurchaseStatus = (purchaseOrder) => {
     // }
     return PURCHASE_CARD_STATUS.WAIT_CONFIRM
   }
-  if (purchaseOrder.status === PURCHASE_STATUS.PURCHASING && purchaseOrder.purchaseApprovalStatus === PURCHASE_APPROVAL_STATUS.UNAPPROVED) {
+  if (purchaseOrder.status === PURCHASE_STATUS.PURCHASING && purchaseOrder.purchaseApprovalStatus === PURCHASE_APPROVAL_STATUS.APPROVED) {
     // return {
     //   label: "待发货",
     //   color: "#008000",

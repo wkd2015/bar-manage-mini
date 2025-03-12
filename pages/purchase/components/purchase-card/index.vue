@@ -74,7 +74,7 @@ const currentOperationType = computed(() => {
   //   return OPERATION_TYPE.PAYMENT_CONFIRM;
   // }
 
-  if (props.purchaseParams.status === PURCHASE_STATUS.PURCHASING && props.purchaseParams.purchaseApprovalStatus === PURCHASE_APPROVAL_STATUS.UNAPPROVED) {
+  if (props.purchaseParams.status === PURCHASE_STATUS.PURCHASING && props.purchaseParams.purchaseApprovalStatus === PURCHASE_APPROVAL_STATUS.APPROVED) {
     return OPERATION_TYPE.DELIVERED_CONFIRM
   }
 

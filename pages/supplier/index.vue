@@ -2,8 +2,8 @@
 import { computed, ref } from "vue";
 import { onShow } from '@dcloudio/uni-app'
 import { useStore } from "vuex";
-import GoodsCard from "./components/goods-card/index.vue";
-import { ProductService } from "../../services/product";
+import SupplierCard from "../purchase/components/supplier/supplier-card.vue";
+import { SupplierService } from "../../services/supplier";
 
 const store = useStore();
 const navbarInfo = computed(() => store.getters.navbarInfo);
@@ -18,16 +18,16 @@ const pageParams = ref({
   currentPage: 1,
   pageSize: 10
 })
-const goodsList = ref([]);
+const supplierList = ref([]);
 
-const getGoodsList = async () => {
+const getSupplierList = async () => {
   loadStatus.value = "loading";
   const params = {
     ...pageParams.value
   }
-  const { data } = await ProductService.getProductList(params)
+  const { data } = await SupplierService.getSuppliersByParams(params)
   const newList = data.list || []
-  goodsList.value = [...goodsList.value, ...newList];
+  supplierList.value = [...supplierList.value, ...newList];
   const isLast = data.pageInfo.currentPage === data.pageInfo.totalPage
   loadStatus.value = isLast ? "nomore" : "more";
 };
@@ -38,7 +38,7 @@ const onReachBottom = async () => {
       ...pageParams.value,
       currentPage: pageParams.value.currentPage + 1
     }
-    await getGoodsList();
+    await getSupplierList();
   } else {
     return
   }
@@ -49,20 +49,20 @@ const onNavClick = () => {
 }
 
 onShow(async () => {
-  await getGoodsList()
+  await getSupplierList()
 })
 </script>
 
 <template>
   <view class="container" :style="`padding-top: ${navbarInfo.barHeight}px;`">
-    <navbar title="商品管理" :opacity="1" showNavBack :onNavClick="onNavClick"></navbar>
-    <view class="goods-list">
+    <navbar title="供应商管理" :opacity="1" showNavBack :onNavClick="onNavClick"></navbar>
+    <view class="supplier-list">
       <scroll-view
         scroll-y
         @scrolltolower="onReachBottom"
         class="scroll-view-container"
       >
-        <GoodsCard v-for="item in goodsList" :key="item.id" :goods="item" :displayOnly="true" />
+        <SupplierCard v-for="item in supplierList" :key="item.id" :supplier="item" :displayOnly="true" />
         <uni-load-more :status="loadStatus" :content-text="contentText" />
       </scroll-view>
     </view>
@@ -78,7 +78,7 @@ onShow(async () => {
   box-sizing: border-box;
 }
 
-.goods-list {
+.supplier-list {
   height: 100%;
 }
 

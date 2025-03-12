@@ -22,12 +22,17 @@ const props = defineProps({
 });
 
 const stockInOutType = ref("stockIn");
+const stockOutType = ref("opened")
 const stockInOutPopup = ref(null);
 const stockInNum = ref(0);
 const stockOutNum = ref(0);
 const stockInOutTypeList = ref([
   { value: "stockIn", text: "入库" },
   { value: "stockOut", text: "出库" },
+])
+const stockOutTypeList = ref([
+  { value: "opened", text: "已开封" },
+  { value: "unOpened", text: "未开封" },
 ])
 const stockOpenPopup = ref(null);
 const stockOpenNum = ref(0);
@@ -41,6 +46,7 @@ const onStockInOut = () => {
 const onStockInOutPopupChange = (e) => {
   if (!e.show) {
     stockInOutType.value = "stockIn";
+    stockOutType.value = 'opened'
     stockInNum.value = 0;
     stockOutNum.value = 0;
   }
@@ -52,11 +58,13 @@ const onStockInOutPopupClose = () => {
 
 const onStockInOutConfirm = async () => {
   const type = stockInOutType.value === "stockIn" ? 1 : 2;
+  const verifyType = stockOutType.value === 'opened' ? 2 : 1
   const params = {
     type,
     shopId: userInfo.value.shopId,
     productId: props.stockInfo.productId,
-    quantity: type === 1 ? stockInNum.value : stockOutNum.value
+    quantity: type === 1 ? stockInNum.value : stockOutNum.value,
+    ...(type === 2 ? { verifyType } : {})
   }
   await InventoryService.updateInventory(params);
   emit("stock-change"); 
@@ -79,7 +87,7 @@ const onStockOpenPopupClose = () => {
 
 const onStockOpenConfirm = async () => {
   const params = {
-    type: 4,
+    type: 3,
     shopId: userInfo.value.shopId,
     productId: props.stockInfo.productId,
     quantity: stockOpenNum.value
@@ -153,6 +161,17 @@ const onStockOpenConfirm = async () => {
               <uni-data-checkbox
                 v-model="stockInOutType"
                 :localdata="stockInOutTypeList"
+                mode="tag"
+                size="small"
+              />
+            </view>
+          </view>
+          <view class="stock-in-out-popup-content-item" v-if="stockInOutType === 'stockOut'">
+            <text class="stock-in-out-popup-content-item-label">出库类型</text>
+            <view class="stock-in-out-popup-content-item-content">
+              <uni-data-checkbox
+                v-model="stockOutType"
+                :localdata="stockOutTypeList"
                 mode="tag"
                 size="small"
               />

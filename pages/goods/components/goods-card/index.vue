@@ -18,6 +18,10 @@ const props = defineProps({
   initCount: {
     type: Number,
     default: 0
+  },
+  displayOnly: {
+    type: Boolean,
+    default: false
   }
 });
 const emit = defineEmits(["selectGoods"]);
@@ -102,7 +106,7 @@ watch(
         >参考价格：￥{{ goods.estimatedPrice }}</view
       >
     </view>
-    <view class="goods-card-handle">
+    <view class="goods-card-handle" v-if="!displayOnly">
       <view
         class="goods-card-handle-packed"
         @click="setGoodsCardSelected"
