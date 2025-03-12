@@ -14,11 +14,14 @@ export class PurchaseService {
     return request({
       path: `${baseUrl}/${data.id}/confirm`,
       method: 'POST',
-      data: {
-        signature: data.signature,
-        paymentTerm: 1,
-        totalAmount: data.totalAmount
-      }
+      data
+    })
+  }
+  static async approvalPurchase(data) {
+    return request({
+      path: `${baseUrl}/${data.id}/purchase-approval`,
+      method: 'POST',
+      data
     })
   }
   static async confirmPurchasePayment(data) {
@@ -77,7 +80,7 @@ export class PurchaseService {
   }
   static async confirmPurchaseStock(data) {
     return request({
-      path: `${baseUrl}/batch-stock`,
+      path: `${baseUrl}/stock`,
       method: 'POST',
       data
     })

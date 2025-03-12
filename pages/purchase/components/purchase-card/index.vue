@@ -4,6 +4,7 @@ import { useStore } from "vuex";
 import dayjs from "dayjs";
 import {
   getPurchaseStatus,
+  PURCHASE_APPROVAL_STATUS,
   PURCHASE_PAYMENT_STATUS,
   PURCHASE_STATUS,
 } from "../../../../constants/purchase";
@@ -52,9 +53,13 @@ const purchaseRole = computed(() =>
   ["SUPER_ADMIN", "PURCHASE"].some((item) => userInfo.value.roles?.includes(item))
 );
 
+const getRoleAvaliable = (role) => {
+  return userInfo.value.roles?.includes(role) || userInfo.value.roles?.includes("SUPER_ADMIN");
+}
+
 const OPERATION_TYPE = {
-  PURCHASE_CONFIRM: 1,
-  PAYMENT_CONFIRM: 2,
+  PURCHASE_APPROVAL: 1,
+  // PAYMENT_CONFIRM: 2,
   DELIVERED_CONFIRM: 3,
   RECIEVED_CONFIRM: 4,
   STOCK_CONFIRM: 5
@@ -62,22 +67,28 @@ const OPERATION_TYPE = {
 
 const currentOperationType = computed(() => {
   if (props.purchaseParams.status === PURCHASE_STATUS.INIT) {
-    return OPERATION_TYPE.PURCHASE_CONFIRM;
+    return OPERATION_TYPE.PURCHASE_APPROVAL;
   }
 
-  if (props.purchaseParams.status === PURCHASE_STATUS.PURCHASING && props.purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.UNPAID) {
-    return OPERATION_TYPE.PAYMENT_CONFIRM;
+  // if (props.purchaseParams.status === PURCHASE_STATUS.PURCHASING && props.purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.UNPAID) {
+  //   return OPERATION_TYPE.PAYMENT_CONFIRM;
+  // }
+
+  if (props.purchaseParams.status === PURCHASE_STATUS.PURCHASING) {
+    // TODO: 测试逻辑，后续改回注释判断
+  //  && props.purchaseParams.approvalStatus === PURCHASE_APPROVAL_STATUS.UNAPPROVED) {
+    return OPERATION_TYPE.DELIVERED_CONFIRM
   }
 
-  if (props.purchaseParams.status === PURCHASE_STATUS.PURCHASING && props.purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID) {
-    return OPERATION_TYPE.DELIVERED_CONFIRM;
-  }
+  // if (props.purchaseParams.status === PURCHASE_STATUS.PURCHASING && props.purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID) {
+  //   return OPERATION_TYPE.DELIVERED_CONFIRM;
+  // }
 
-  if (props.purchaseParams.status === PURCHASE_STATUS.DELIVERED && props.purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID) {
+  if (props.purchaseParams.status === PURCHASE_STATUS.DELIVERED) {
     return OPERATION_TYPE.RECIEVED_CONFIRM;
   }
 
-  if (props.purchaseParams.status === PURCHASE_STATUS.RECEIVED && props.purchaseParams.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID) {
+  if (props.purchaseParams.status === PURCHASE_STATUS.RECEIVED) {
     return OPERATION_TYPE.STOCK_CONFIRM;
   }
 
@@ -113,29 +124,32 @@ const onSignatureConfirm = () => {
           },
           success: async (res) => {
             const { fileID = '' } = res || {};
-            if (currentOperationType.value === OPERATION_TYPE.PURCHASE_CONFIRM) {
-              await PurchaseService.confirmPurchase({
+            if (currentOperationType.value === OPERATION_TYPE.PURCHASE_APPROVAL) {
+              console.warn({p:props.purchaseParams})
+              await PurchaseService.approvalPurchase({
                 id: props.purchaseParams.id,
+                supplierId: props.purchaseParams.supplierInfo.id,
+                paymentTerm: 1,
                 signature: fileID,
                 totalAmount: props.purchaseParams.totalAmount
               });
             }
-            if (currentOperationType.value === OPERATION_TYPE.PAYMENT_CONFIRM) {
-              await PurchaseService.confirmPurchasePayment({
-                id: props.purchaseParams.id,
-                signature: fileID,
-              });
-            }
+            // if (currentOperationType.value === OPERATION_TYPE.PAYMENT_CONFIRM) {
+            //   await PurchaseService.confirmPurchasePayment({
+            //     id: props.purchaseParams.id,
+            //     signature: fileID,
+            //   });
+            // }
             if (currentOperationType.value === OPERATION_TYPE.RECIEVED_CONFIRM) {
               console.warn(props.purchaseParams.id, fileID)
               await PurchaseService.confirmPurchaseReceipt({
                 id: props.purchaseParams.id,
                 signature: fileID
               });
-              await PurchaseService.confirmSettlement({
-                id: props.purchaseParams.id,
-                signature: fileID,
-              })
+              // await PurchaseService.confirmSettlement({
+              //   id: props.purchaseParams.id,
+              //   signature: fileID,
+              // })
             }
             signaturePopup.value.close();
             emit("order-status-change")
@@ -163,10 +177,10 @@ const onOrderDeliveredConfirm = () => {
         })
       });
       console.warn(uploadTasks)
-      Promise.all(uploadTasks).then((res) => {
+      Promise.all(uploadTasks).then(async (res) => {
         const fileIds = (res || []).map((item) => item.fileID);
         console.warn(999, fileIds)
-        PurchaseService.confirmPurchaseDelivery({
+        await PurchaseService.confirmPurchaseDelivery({
           id: props.purchaseParams.id,
           fileIds,
           signature: ""
@@ -295,22 +309,22 @@ const onOrderPaymentConfirm = () => {
       }}</text
     >
     <view class="card-footer">
-      <!-- <view class="card-footer-more">更多</view> -->
+      <view class="card-footer-more">更多</view>
       <view class="card-footer-handles">
         <view
           class="card-footer-handle-item"
-          v-if="currentOperationType === OPERATION_TYPE.PURCHASE_CONFIRM && operationRole"
+          v-if="currentOperationType === OPERATION_TYPE.PURCHASE_APPROVAL && getRoleAvaliable('PURCHASE')"
           @click="onPurchaseOrderConfirm"
         >
-          确认采购单
+          确认采购
         </view>
-        <view
+        <!-- <view
           class="card-footer-handle-item"
           v-if="currentOperationType === OPERATION_TYPE.PAYMENT_CONFIRM && purchaseRole"
           @click="onOrderPaymentConfirm"
         >
           确认付款
-        </view>
+        </view> -->
         <view
           class="card-footer-handle-item"
           v-if="currentOperationType === OPERATION_TYPE.DELIVERED_CONFIRM && operationRole"

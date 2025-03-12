@@ -23,6 +23,14 @@ const initShopInfo = async () => {
   }
 }
 
+const onGridNavClick = (item, type) => {
+  if (type === 'tab') {
+    uni.switchTab({ url: `/pages/${item}/index` })
+  } else {
+    uni.navigateTo({ url: `/pages/${item}/index` })
+  }
+}
+
 watch(
   () => userInfo.value.shopId,
   async (shopId) => {
@@ -61,25 +69,25 @@ watch(
         </view>
       </view>
       <view class="quick-access-grid">
-        <view class="quick-access-grid-item">
+        <view class="quick-access-grid-item" @click="onGridNavClick('goods')">
           <view class="quick-access-grid-item-icon">
             <uni-icons type="home" size="20" />
           </view>
           <view class="quick-access-grid-item-label">商品</view>
         </view>
-        <view class="quick-access-grid-item">
+        <view class="quick-access-grid-item" @click="onGridNavClick('supplier')">
           <view class="quick-access-grid-item-icon">
             <uni-icons type="home" size="20" />
           </view>
           <view class="quick-access-grid-item-label">供应商</view>
         </view>
-        <view class="quick-access-grid-item">
+        <view class="quick-access-grid-item" @click="onGridNavClick('stock', 'tab')">
           <view class="quick-access-grid-item-icon">
             <uni-icons type="home" size="20" />
           </view>
           <view class="quick-access-grid-item-label">库存</view>
         </view>
-        <view class="quick-access-grid-item">
+        <view class="quick-access-grid-item" @click="onGridNavClick('purchase', 'tab') ">
           <view class="quick-access-grid-item-icon">
             <uni-icons type="home" size="20" />
           </view>

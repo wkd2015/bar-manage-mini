@@ -18,6 +18,11 @@ export const PURCHASE_PAYMENT_STATUS = {
   UNPAID: 1
 };
 
+export const PURCHASE_APPROVAL_STATUS = {
+  UNAPPROVED: 1,
+  APPROVED: 2
+}
+
 export const getPurchaseStatus = (purchaseOrder) => {
   if (purchaseOrder.status === PURCHASE_STATUS.INIT) {
     return {
@@ -25,19 +30,15 @@ export const getPurchaseStatus = (purchaseOrder) => {
       color: "#FFA500",
     }
   }
-  if (purchaseOrder.status === PURCHASE_STATUS.PURCHASING && purchaseOrder.paymentStatus === PURCHASE_PAYMENT_STATUS.UNPAID) {
+  if (purchaseOrder.status === PURCHASE_STATUS.PURCHASING){
+    // TODO: 测试逻辑，后续补充下面注释判断
+    // && purchaseOrder.approvalStatus === PURCHASE_APPROVAL_STATUS.UNAPPROVED) {
     return {
-      label: "采购中",
+      label: "待发货",
       color: "#008000",
     }
   }
-  if (purchaseOrder.status === PURCHASE_STATUS.PURCHASING && purchaseOrder.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID) {
-    return {
-      label: "待发货",
-      color: "#FFA500",
-    }
-  }
-  if (purchaseOrder.status === PURCHASE_STATUS.DELIVERED && purchaseOrder.paymentStatus === PURCHASE_PAYMENT_STATUS.PAID) {
+  if (purchaseOrder.status === PURCHASE_STATUS.DELIVERED) {
     return {
       label: "已发货",
       color: "#008000",

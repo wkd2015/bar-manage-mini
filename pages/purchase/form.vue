@@ -148,6 +148,8 @@ const onPurchaseFormConfirm = async () => {
 
   await PurchaseService.createPurchase(params);
   // TODO: 表单校验
+
+  uni.navigateBack({ delta: 1 });
 };
 
 onMounted(async () => {

@@ -1,12 +1,13 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
+import { onShow } from '@dcloudio/uni-app'
 import { useStore } from "vuex";
 import PurchaseCard from "./components/purchase-card/index.vue";
 import {PurchaseService} from "../../services/purchase";
 
-import { mockPurchaseList } from "../../services/mock";
-
 const store = useStore();
+const navbarInfo = computed(() => store.getters.navbarInfo);
+const userInfo = computed(() => store.getters.userInfo);
 
 const loadStatus = ref("more");
 const contentText = ref({
@@ -14,13 +15,24 @@ const contentText = ref({
   contentrefresh: "正在加载",
   contentnomore: "没有更多数据了",
 });
-const navbarInfo = computed(() => store.getters.navbarInfo);
 const purchaseList = ref([]);
+const pageParams = ref({
+  currentPage: 1,
+  pageSize: 10
+})
 
 const getPurchaseList = async () => {
-  const {data = {}} = await PurchaseService.getPurchaseList({})
+  loadStatus.value = "loading";
+  const params = {
+    ...pageParams.value,
+    shopId: userInfo.value.shopId
+  }
+  const {data = {}} = await PurchaseService.getPurchaseList(params)
   // console.warn(res)
-  purchaseList.value = data.list || []
+  const newList = data.list || []
+  purchaseList.value = [...purchaseList.value, ...newList];
+  const isLast = data.pageInfo.currentPage === data.pageInfo.totalPage
+  loadStatus.value = isLast ? "nomore" : "more";
 }
 
 const onPurchaseCreate = () => {
@@ -29,9 +41,20 @@ const onPurchaseCreate = () => {
   });
 };
 
-onMounted(async () => {
-  console.log("6932938u");
-  await getPurchaseList();
+const onReachBottom = async () => {
+	if (loadStatus.value !== 'nomore') {
+    pageParams.value = {
+      ...pageParams.value,
+      currentPage: pageParams.value.currentPage + 1
+    }
+    await getPurchaseList();
+  } else {
+    return
+  }
+}
+
+onShow(async () => {
+  await getPurchaseList()
 })
 </script>
 
@@ -71,19 +94,18 @@ onMounted(async () => {
 .container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   box-sizing: border-box;
 }
 
 .purchase-list {
-  flex: 1;
-  display: flex;
+  height: 100%;
 }
 
 .scroll-view-container {
+  height: 100%;
   padding: 12px 0;
   background-color: #f5f5f5;
-  flex: 1;
 }
 
 .purchase-list-container {
