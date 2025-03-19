@@ -60,3 +60,10 @@ const formData = defineModel({
     </uni-forms>
   </view>
 </template>
+
+<style lang="scss" scoped>
+.supplier-form {
+  background-color: #fff;
+  padding: 20px;
+}
+</style>

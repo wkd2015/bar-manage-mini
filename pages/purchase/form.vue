@@ -77,11 +77,24 @@ const onSupplierSelectedChange = (supplier) => {
 const toSupplierForm = () => {
   supplierFormPopup.value.onPopupOpen();
 }
+const resetSupplierAdd = () => {
+  supplierFormData.value = {
+    name: "",
+    estimatedPrice: 0,
+    imageUrl: "",
+    category: "",
+  }
+}
+const onSupplierFormCancel = () => {
+  resetSupplierAdd();
+  supplierFormPopup.value.onPopupClose();
+};
 const onSupplierFormConfirm = async () => {
   await SupplierService.createSupplier(supplierFormData.value);
-  onSuppliersSearch();
+  resetSupplierAdd();
   supplierFormPopup.value.onPopupClose();
-}
+  await onSuppliersSearch();
+};
 const onGoodsSelect = async () => {
   await onGoodsSearch();
   goodsPopup.value.onPopupOpen();
@@ -540,7 +553,8 @@ onMounted(async () => {
   color: #fff;
 }
 
-.goods-add-handles {
+.goods-add-handles,
+.supplier-add-handles {
   flex: 1;
   display: flex;
   justify-content: space-between;
@@ -550,7 +564,8 @@ onMounted(async () => {
   gap: 16px;
 }
 
-.goods-add-handles-cancel {
+.goods-add-handles-cancel,
+.supplier-add-handles-cancel {
   flex: 1;
   height: 36px;
   border-radius: 6px;
@@ -562,7 +577,8 @@ onMounted(async () => {
   box-sizing: border-box;
 }
 
-.goods-add-handles-confirm {
+.goods-add-handles-confirm,
+.supplier-add-handles-confirm {
   flex: 1;
   height: 36px;
   border-radius: 6px;
