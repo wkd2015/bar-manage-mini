@@ -21,7 +21,7 @@ const pageParams = ref({
   pageSize: 10
 })
 
-const getPurchaseList = async () => {
+const getPurchaseList = async (isRefresh) => {
   loadStatus.value = "loading";
   const params = {
     ...pageParams.value,
@@ -30,7 +30,7 @@ const getPurchaseList = async () => {
   const {data = {}} = await PurchaseService.getPurchaseList(params)
   // console.warn(res)
   const newList = data.list || []
-  purchaseList.value = [...purchaseList.value, ...newList];
+  purchaseList.value = isRefresh ? newList : [...purchaseList.value, ...newList];
   const isLast = data.pageInfo.currentPage === data.pageInfo.totalPage
   loadStatus.value = isLast ? "nomore" : "more";
 }
@@ -75,7 +75,7 @@ onShow(async () => {
             :purchaseParams="item"
             v-for="item in purchaseList"
             :key="item.id"
-            @order-status-change="getPurchaseList"
+            @order-status-change="() => getPurchaseList(true)"
           />
         </view>
         <uni-load-more :status="loadStatus" :content-text="contentText" />

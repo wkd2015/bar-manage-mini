@@ -159,9 +159,10 @@ const onSignatureConfirm = () => {
 }
 
 const onOrderDeliveredConfirm = () => {
-  wx.chooseMessageFile({
+  wx.chooseMedia({
     count: 9,
-    type: "all",
+    mediaType: ['image'],
+    sourchType: ['album', 'camera'],
     success: (res) => {
       console.warn(res)
       const tempFiles = res.tempFiles || [];

@@ -198,14 +198,14 @@ onMounted(async () => {
           <view class="purchase-form-item-label">参考价格</view>
           <view class="purchase-form-item-content">￥{{ allGoodsRefrencePrice }}</view>
         </view>
-        <view class="purchase-form-item">
+        <!-- <view class="purchase-form-item">
           <view class="purchase-form-item-label">实付价格</view>
           <uni-number-box
             v-model="purchasePrice"
             :min="0"
             :max="99999"
           />
-        </view>
+        </view> -->
         <view class="purchase-form-item">
           <view class="purchase-form-item-label">付款账户</view>
           <uni-easyinput
