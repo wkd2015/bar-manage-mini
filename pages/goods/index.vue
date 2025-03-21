@@ -16,7 +16,7 @@ const contentText = ref({
   contentnomore: "没有更多数据了",
 });
 const pageParams = ref({
-  currentPage: 1,
+  pageNum: 1,
   pageSize: 10
 })
 const goodsList = ref([]);
@@ -36,7 +36,7 @@ const getGoodsList = async (isRefresh) => {
   const { data } = await ProductService.getProductList(params)
   const newList = data.list || []
   goodsList.value = isRefresh ? newList : [...goodsList.value, ...newList];
-  const isLast = data.pageInfo.currentPage === data.pageInfo.totalPage
+  const isLast = data.pageInfo.pageNum === data.pageInfo.totalPage
   loadStatus.value = isLast ? "nomore" : "more";
 };
 
@@ -44,7 +44,7 @@ const onReachBottom = async () => {
 	if (loadStatus.value !== 'nomore') {
     pageParams.value = {
       ...pageParams.value,
-      currentPage: pageParams.value.currentPage + 1
+      pageNum: pageParams.value.pageNum + 1
     }
     await getGoodsList();
   } else {
