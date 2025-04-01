@@ -20,9 +20,16 @@ const supplierName = ref("");
 const goodsPopup = ref(null);
 const goodsSearchParams = ref({
   name: "",
+  supplierId: 0,
   pageNum: 1,
   pageSize: 10
 })
+const loadStatus = ref("more");
+const contentText = ref({
+  contentdown: "上拉显示更多",
+  contentrefresh: "正在加载",
+  contentnomore: "没有更多数据了",
+});
 const goodsList = ref([]);
 const selectedGoodsList = ref([]);
 const purchaseGoodsList = ref([]);
@@ -62,7 +69,6 @@ const onSupplierSelect = async () => {
   supplierPopup.value.open();
 }
 const onSupplierPopupClose = () => {
-
   supplierPopup.value.close();
 }
 const onSuppliersSearch = async () => {
@@ -71,7 +77,8 @@ const onSuppliersSearch = async () => {
 };
 const onSupplierSelectedChange = (supplier) => {
   supplierName.value = supplier.name;
-  purchaseParams.supplierId = supplier.id;
+  purchaseParams.value.supplierId = supplier.id;
+  goodsSearchParams.value.supplierId = supplier.id
   supplierPopup.value.close();
 };
 const toSupplierForm = () => {
@@ -96,12 +103,28 @@ const onSupplierFormConfirm = async () => {
   await onSuppliersSearch();
 };
 const onGoodsSelect = async () => {
+  if (purchaseParams.value.supplierId === 0) {
+    uni.showToast({
+      title: "请先选择供应商",
+      icon: "none"
+    })
+    return
+  }
   await onGoodsSearch();
   goodsPopup.value.onPopupOpen();
 };
 const onGoodsSearch = async () => {
-  const { data = {} } = await ProductService.getProductList(goodsSearchParams.value)
-  goodsList.value = data.list || [];
+  loadStatus.value = "loading";
+  const params = {
+    ...goodsSearchParams.value,
+    shopId: userInfo.value.shopId
+  }
+  const { data = {} } = await ProductService.getProductList(params)
+  // goodsList.value = data.list || [];
+  const newList = data.list || []
+  goodsList.value = [...goodsList.value, ...newList];
+  const isLast = data.pageInfo.pageNum === data.pageInfo.totalPage
+  loadStatus.value = isLast ? "nomore" : "more";
 };
 const onGoodsSelectedChange = (list) => {
   selectedGoodsList.value = (list || []).filter((item) => item.count > 0);
@@ -154,7 +177,7 @@ const onPurchaseFormConfirm = async () => {
     }
   })
   const params = {
-    supplierId: purchaseParams.supplierId,
+    supplierId: purchaseParams.value.supplierId,
     items,
     shopId: userInfo.value.shopId
   }
@@ -164,6 +187,18 @@ const onPurchaseFormConfirm = async () => {
 
   uni.navigateBack({ delta: 1 });
 };
+
+const onReachBottom = async () => {
+	if (loadStatus.value !== 'nomore') {
+    goodsSearchParams.value = {
+      ...goodsSearchParams.value,
+      pageNum: goodsSearchParams.value.pageNum + 1
+    }
+    await onGoodsSearch();
+  } else {
+    return
+  }
+}
 
 onMounted(async () => {
   await onSuppliersSearch();
@@ -247,10 +282,15 @@ onMounted(async () => {
               @confirm="onGoodsSearch"
             />
           </view>
-          <GoodsList
-            :goodsList="goodsList"
-            @select-goods="onGoodsSelectedChange"
-          />
+          <view class="goods-content-list">
+            <scroll-view scroll-y class="scroll-view-container" @scrolltolower="onReachBottom">
+              <GoodsList
+                :goodsList="goodsList"
+                @select-goods="onGoodsSelectedChange"
+              />
+              <uni-load-more :status="loadStatus" :content-text="contentText" />
+            </scroll-view>
+          </view>
         </view>
       </template>
       <template #footer>
@@ -344,8 +384,19 @@ onMounted(async () => {
 .container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   box-sizing: border-box;
+}
+
+.goods-content-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.scroll-view-container {
+  height: 100%;
+  padding: 12px 0;
+  background-color: #f5f5f5;
 }
 
 .supplier-popup {
@@ -521,14 +572,16 @@ onMounted(async () => {
 
 .goods-content {
   display: flex;
-  flex: 1;
   flex-direction: column;
   gap: 10px;
   background-color: #f5f5f5;
+  height: 100%;
 }
 
 .goods-content-search {
   background-color: #fff;
+  height: 56px;
+  flex-shrink: 0;
 }
 
 .goods-handles {

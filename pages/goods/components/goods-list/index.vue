@@ -26,13 +26,9 @@ const onGoodsSelect = (goods) => {
 </script>
 
 <template>
-  <view class="goods-list">
-    <scroll-view scroll-y>
-      <view class="goods-list-container">
-        <GoodsCard v-for="item in goodsList" :key="item.id" :goods="item" @select-goods="onGoodsSelect" />
-      </view>
-    </scroll-view>
-  </view>
+    <view class="goods-list-container">
+      <GoodsCard v-for="item in goodsList" :key="item.id" :goods="item" @select-goods="onGoodsSelect" />
+    </view>
 </template>
 
 <style scoped>
@@ -41,7 +37,7 @@ const onGoodsSelect = (goods) => {
 }
 
 .goods-list-container {
-  height: 100%;
+  /* height: 100%; */
   display: flex;
   flex-direction: column;
 }

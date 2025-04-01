@@ -70,6 +70,7 @@ defineExpose({
 
 .action-sheet-header {
   display: flex;
+  flex-shrink: 0;
   justify-content: center;
   align-items: center;
   position: relative;
@@ -89,6 +90,7 @@ defineExpose({
 .action-sheet-content {
   display: flex;
   flex: 1;
+  min-height: 0;
   flex-direction: column;
   gap: 10px;
   background-color: #f5f5f5;
@@ -96,7 +98,7 @@ defineExpose({
 
 .action-sheet-footer {
   height: 50px;
-  display: flex;
+  flex-shrink: 0;
   justify-content: space-between;
   align-items: center;
   gap: 16px;

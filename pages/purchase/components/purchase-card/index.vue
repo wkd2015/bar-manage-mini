@@ -169,7 +169,7 @@ const onOrderDeliveredConfirm = () => {
       const uploadTasks = tempFiles.map((item) => {
         return wx.cloud.uploadFile({
           cloudPath: `delivery-note/${props.purchaseParams.orderNo}/${item.name}`,
-          filePath: item.path,
+          filePath: item.tempFilePath,
           config: {
             env: "prod-0glco3k7aad42178"
           },

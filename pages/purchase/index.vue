@@ -28,7 +28,7 @@ const getPurchaseList = async (isRefresh) => {
     shopId: userInfo.value.shopId
   }
   const {data = {}} = await PurchaseService.getPurchaseList(params)
-  // console.warn(res)
+  console.warn(data)
   const newList = data.list || []
   purchaseList.value = isRefresh ? newList : [...purchaseList.value, ...newList];
   const isLast = data.pageInfo.currentPage === data.pageInfo.totalPage
@@ -54,7 +54,8 @@ const onReachBottom = async () => {
 }
 
 onShow(async () => {
-  await getPurchaseList()
+  console.warn('onShow')
+  await getPurchaseList(true)
 })
 </script>
 
