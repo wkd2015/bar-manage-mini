@@ -34,4 +34,12 @@ export class ShopService {
       data: {}
     })
   }
+
+  static async addShopStaff(data) {
+    return request({
+      path: `${baseUrl}/staff`,
+      method: 'POST',
+      data
+    })
+  }
 }

@@ -61,6 +61,10 @@ const onAddStaffClick = () => {
   addStaffPopup.value.open();
 }
 
+const onAddStaffPopupClose = () => {
+  addStaffPopup.value.close()
+}
+
 const onAddStaffPopupChange = (e) => {
   if (!e.show) {
     addStaffSearchParams.value = {
@@ -81,18 +85,18 @@ const onSearchStaffCancel = () => {
 
 const onSearchStaffConfirm = async () => {
   const { data } = await StaffService.getStaffsByParams(addStaffSearchParams.value)
-  searchStaffList.value = data || []
+  const searchStaffTempList = data || []
+  console.warn(searchStaffTempList)
+  searchStaffList.value = searchStaffTempList.filter(item => userInfo.value.shopId !== item.shopId)
 }
 
-const onAddStaffClickConfirm = async () => {
+const onAddStaffClickConfirm = async (id) => {
   const { data } = await ShopService.addShopStaff({
     shopId: userInfo.value.shopId,
-    staffId: addStaffSearchParams.value.id
+    staffId: id
   })
-  if (data) {
-    staffList.value.push(data)
-  }
-  addStaffPopup.value.onPopupClose()
+    await initShopDetail(userInfo.value.shopId)
+    await onSearchStaffConfirm()
 }
 
 watch(
@@ -139,9 +143,9 @@ watch(
           <view class="shop-staffs-header-count">
             <view class="shop-staffs-header-count-text">共{{ staffList.length }}位</view>
           </view>
-          <!-- <view class="shop-staffs-header-add" @click="onAddStaffClick">
+          <view class="shop-staffs-header-add" @click="onAddStaffClick">
             <uni-icons type="plus" size="20" />
-          </view> -->
+          </view>
         </view>
         <view class="shop-staffs-list">
           <view class="shop-staffs-list-item" v-for="item in staffList" :key="item.id">
@@ -169,16 +173,17 @@ watch(
         </view>
         <view class="add-staff-popup-content">
           <view class="add-staff-popup-content-search">
+            <view class="add-staff-popup-content-search-title">搜索店员</view>
             <view class="add-staff-popup-content-search-item">
               <view class="add-staff-popup-content-search-item-label">姓名:</view>
               <view class="add-staff-popup-content-search-item-input">
-                <input type="text" v-model="addStaffName" placeholder="请输入姓名" />
+                <input type="text" v-model="addStaffSearchParams.userName" placeholder="请输入姓名" />
               </view>
             </view>
             <view class="add-staff-popup-content-search-item">
               <view class="add-staff-popup-content-search-item-label">手机号:</view>
               <view class="add-staff-popup-content-search-item-input">
-                <input type="text" v-model="addStaffPhone" placeholder="请输入手机号" />
+                <input type="text" v-model="addStaffSearchParams.phone" placeholder="请输入手机号" />
               </view>
             </view>
             <view class="add-staff-popup-content-search-handle">
@@ -208,6 +213,10 @@ watch(
 </template>
 
 <style scoped>
+.add-staff-popup-content-list {
+  
+}
+
 .add-staff-popup {
   padding-bottom: env(safe-area-inset-bottom);
   display: flex;
@@ -217,6 +226,7 @@ watch(
   padding: 0;
   box-sizing: border-box;
   width: 100vw;
+  height: 80vh;
 }
 
 .add-staff-popup-header {
@@ -248,6 +258,7 @@ watch(
   gap: 10px;
   padding: 10px;
   background-color: #fff;
+  border-bottom: 0.5px solid #eee;
 }
 
 .add-staff-popup-content-search-item {
@@ -258,6 +269,7 @@ watch(
 .add-staff-popup-content-search-item-label {
   font-size: 14px;
   color: #666;
+  width: 60px;
 }
 .add-staff-popup-content-search-item-input {
   flex: 1;
@@ -294,7 +306,7 @@ watch(
   color: #333;
 }
 .add-staff-popup-content-search-handle-confirm {
-  background-color: #ff6f00;
+  background-color: #007aff;
   color: #fff;
 }
 .add-staff-popup-content-list {

@@ -134,7 +134,10 @@ watch(
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #f5f5f5;
+  background-image: linear-gradient(0deg, rgba(26, 26, 46, 0), rgba(26, 26, 46, 0)), linear-gradient(180deg, #2C3E50 0%, rgba(44, 62, 80, 0.9) 40%, rgba(44, 62, 80, 0) 100%);
+  background-size: 100% 100%, 100% 370px;
+  background-repeat: no-repeat;
+  background-position: 0 0, 0 0;
   padding: 10px;
   box-sizing: border-box;
 }
@@ -143,10 +146,11 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background-color: #fff;
+  background: rgba(255, 255, 255, 0.1);
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 10px;
+  backdrop-filter: blur(10px);
 }
 
 .shop-info-item {
@@ -157,14 +161,14 @@ watch(
 
 .shop-info-item-label {
   font-size: 14px;
-  color: #666;
+  color: #fff;
   width: 100px;
   flex-shrink: 0;
 }
 
 .shop-info-item-value {
   font-size: 14px;
-  color: #333;
+  color: #fff;
   flex: 1;
 }
 
@@ -172,7 +176,7 @@ watch(
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  background-color: #fff;
+  /* background-color: #fff; */
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -185,7 +189,7 @@ watch(
   gap: 10px;
   padding: 10px;
   border-radius: 10px;
-  background-color: #f5f5f5;
+  /* background-color: #f5f5f5; */
   color: #333;
   font-size: 14px;
   text-align: center;

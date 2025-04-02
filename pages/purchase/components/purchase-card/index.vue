@@ -199,6 +199,7 @@ const onOrderStockPopupClose = () => {
 }
 
 const onOrderStockPopupConfirm = async () => {
+  console.warn('onOrderStockPopupConfirm')
   await PurchaseService.confirmPurchaseStock([props.purchaseParams.id]);
   orderStockPopup.value.close();
   emit("order-status-change")
@@ -400,10 +401,10 @@ const onOrderPaymentConfirm = () => {
             </view>
           </view>
         </view>
-        <view class="order-stock-popup-handle">
-          <view class="order-stock-popup-handle-confirm" @click="onOrderStockPopupConfirm">
+        <view class="order-stock-popup-handle" @click="onOrderStockPopupConfirm">
+          <!-- <view class="order-stock-popup-handle-confirm" > -->
             确认入库
-          </view>
+          <!-- </view> -->
         </view>
       </view>
     </uni-popup>
