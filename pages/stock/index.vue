@@ -2,10 +2,10 @@
   <view class="container" :style="`padding-top: ${navbarInfo.barHeight}px;`">
     <navbar title="库存" :opacity="1"></navbar>
     <view class="stock-content" :style="`height: calc(100vh - ${navbarInfo.barHeight}px);`">
-      <view class="stock-search">
+      <!-- <view class="stock-search">
         <view class="stock-search-box">
           <uni-search-bar
-            v-model="searchText"
+            v-model="filterParams.searchText"
             placeholder="搜索商品"
             @confirm="onSearch"
           />
@@ -16,22 +16,28 @@
             class="stock-search-filter-icon"
           />
         </view>
-      </view>
+      </view> -->
 
       <view class="stock-list">
-        <StockCard 
-          v-for="item in stockList"
-          :key="item.id"
-          :stock-info="item"
-          @stock-change="getInventoryList"
-        />
+        <scroll-view
+          scroll-y
+          @scrolltolower="onReachBottom"
+          class="scroll-view-container"
+        >
+          <StockCard 
+            v-for="item in stockList"
+            :key="item.id"
+            :stock-info="item"
+            @stock-change="getInventoryList"
+          />
+        </scroll-view>
       </view>
       <!-- <view class="stock-bottom">
         <view class="stock-bottom-out" @click="openPurchaseStockInPopup">批量出库</view>
         <view class="stock-bottom-open" @click="openPurchaseStockOutPopup">批量开封</view>
       </view> -->
     </view>
-    <uni-popup
+    <!-- <uni-popup
       ref="filterPopup"
       type="right"
     >
@@ -65,8 +71,8 @@
           </view>
         </view>
       </view>
-    </uni-popup>
-    <fullscreen-popup
+    </uni-popup> -->
+    <!-- <fullscreen-popup
       ref="purchaseStockInPopup"
       title="采购入库"
     >
@@ -76,7 +82,7 @@
           </view>
         </view>
       </template>
-    </fullscreen-popup>
+    </fullscreen-popup> -->
     <!-- <uni-fab
       horizontal="right"
       vertical="bottom"

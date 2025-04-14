@@ -65,22 +65,44 @@ onShow(async () => {
       title="采购"
       :opacity="1"
     />
-    <view class="purchase-list">
-      <scroll-view
-        scroll-y
-        @scrolltolower="onReachBottom"
-        class="scroll-view-container"
-      >
-        <view class="purchase-list-container">
-          <PurchaseCard
-            :purchaseParams="item"
-            v-for="item in purchaseList"
-            :key="item.id"
-            @order-status-change="() => getPurchaseList(true)"
+    <!-- TODO: 采购列表搜索 -->
+    <!-- TODO: 采购列表筛选可入库订单（按照角色权限区分提醒） -->
+     <!-- TODO: 滚动列表组件封装 -->
+    <!-- TODO: 库存列表加滚动功能 -->
+     <!-- TODO: 新增店铺功能 -->
+    <view class="purchase-content" :style="`height: calc(100vh - ${navbarInfo.barHeight}px);`">
+      <view class="purchase-search">
+        <view class="purchase-search-box">
+          <uni-search-bar
+            v-model="searchText"
+            placeholder="搜索订单"
+            @confirm="onSearch"
           />
         </view>
-        <uni-load-more :status="loadStatus" :content-text="contentText" />
-      </scroll-view>
+        <view class="purchase-search-filter" @click="openFilterPopup">
+          <image
+            src="../../static/imgs/filter-icon.png"
+            class="purchase-search-filter-icon"
+          />
+        </view>
+      </view>
+      <view class="purchase-list">
+        <scroll-view
+          scroll-y
+          @scrolltolower="onReachBottom"
+          class="scroll-view-container"
+        >
+          <view class="purchase-list-container">
+            <PurchaseCard
+              :purchaseParams="item"
+              v-for="item in purchaseList"
+              :key="item.id"
+              @order-status-change="() => getPurchaseList(true)"
+            />
+          </view>
+          <uni-load-more :status="loadStatus" :content-text="contentText" />
+        </scroll-view>
+      </view>
     </view>
     <uni-fab
       horizontal="right"

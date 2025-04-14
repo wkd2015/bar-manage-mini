@@ -76,6 +76,10 @@ const onGoodsEditSave = () => {
 
 const onGoodsDelete = () => {};
 
+const getGoodsPrice = (price) => {
+  return !price ? '时价' : `¥${price.toFixed(2)}`
+};
+
 watch(
   () => props.goods,
   (newVal) => {
@@ -103,7 +107,7 @@ watch(
       <view class="goods-name">商品名称：{{ goods.name }}</view>
       <view class="goods-category">商品分类：{{ goods.category }}</view>
       <view class="goods-reference-price"
-        >参考价格：￥{{ goods.estimatedPrice }}</view
+        >参考价格：{{ getGoodsPrice(goods.estimatedPrice) }}</view
       >
     </view>
     <view class="goods-card-handle" v-if="!displayOnly">
