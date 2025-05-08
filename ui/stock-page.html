@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>库存管理</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    body {
+      background-color: #f6f6f6;
+      color: #333;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden; /* 禁止body滚动 */
+    }
+    
+    .container {
+      max-width: 414px;
+      margin: 0 auto;
+      background-color: #f6f6f6;
+      height: 100vh; /* 固定高度 */
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* 禁止整体容器滚动 */
+    }
+    
+    /* 顶部导航栏 */
+    .navbar {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      background-color: #1565c0;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 16px;
+      width: 100%;
+      flex-shrink: 0; /* 防止收缩 */
+    }
+    
+    .navbar-title {
+      font-size: 17px;
+      font-weight: 500;
+      flex: 1;
+      text-align: center;
+    }
+    
+    /* 顶部数据统计 */
+    .header {
+      background: linear-gradient(180deg, #1565c0 0%, #1565c0 10%, #2979ff 100%);
+      color: white;
+      padding: 0 16px 30px;
+      width: 100%;
+      margin-top: -1px; /* 消除navbar和header之间的分隔线 */
+      flex-shrink: 0; /* 防止收缩 */
+    }
+    
+    .data-overview {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+    }
+    
+    .data-item {
+      flex: 1;
+      text-align: center;
+      padding: 8px 0;
+      position: relative;
+    }
+    
+    .data-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 25%;
+      height: 50%;
+      width: 1px;
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .data-value {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    
+    .data-label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    /* 快捷功能区 */
+    .quick-actions {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 0 0;
+    }
+    
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 10px;
+      flex: 1;
+      margin: 0 5px;
+    }
+    
+    .action-btn-icon {
+      font-size: 20px;
+      margin-bottom: 5px;
+    }
+    
+    .action-btn-text {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    /* 内容区域 */
+    .content-area {
+      width: 100%;
+      background: linear-gradient(180deg, #f0f7ff 0%, #f8fbff 50%, #ffffff 100%);
+      border-radius: 16px 16px 0 0;
+      margin-top: -16px;
+      padding-top: 10px;
+      padding-bottom: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* 防止整体滚动 */
+    }
+    
+    /* 过滤器 */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+    }
+    
+    .filter-tabs {
+      display: flex;
+    }
+    
+    .filter-tab {
+      padding: 5px 12px;
+      margin-right: 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #666;
+      background-color: #f2f2f2;
+    }
+    
+    .filter-tab.active {
+      background-color: #e3f2fd;
+      color: #2979ff;
+      font-weight: 500;
+    }
+    
+    .filter-button {
+      color: #666;
+      font-size: 20px;
+    }
+    
+    /* 库存列表 */
+    .stock-list {
+      padding: 10px 0;
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 70px; /* 留出底部空间 */
+      /* 隐藏滚动条 */
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    
+    .stock-list::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    
+    /* 库存卡片 */
+    .stock-card {
+      margin: 0 12px 12px;
+      background-color: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stock-card-top {
+      display: flex;
+      padding: 16px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    
+    .stock-card-thumbnail {
+      width: 80px;
+      height: 80px;
+      border-radius: 6px;
+      margin-right: 12px;
+      overflow: hidden;
+      background-color: #f5f5f5;
+    }
+    
+    .stock-card-thumbnail-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .stock-card-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .stock-card-info-goods {
+      flex: 1;
+    }
+    
+    .stock-card-info-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .stock-card-info-price {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    
+    .stock-card-info-category {
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .stock-card-info-stock {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .stock-tag {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    
+    .stock-tag-primary {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+    
+    .stock-tag-success {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .stock-card-bottom {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 16px;
+      gap: 10px;
+    }
+    
+    .stock-card-right-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .stock-card-button {
+      width: 70px;
+      height: 28px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+    }
+    
+    .stock-card-button-in-out {
+      border: 1px solid #2979ff;
+      color: #2979ff;
+    }
+    
+    .stock-card-button-open {
+      border: 1px solid #18bc37;
+      color: #18bc37;
+    }
+    
+    .stock-card-button-warning {
+      border: 1px solid #ff9800;
+      color: #ff9800;
+    }
+    
+    /* 底部弹窗 */
+    .popup {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+    }
+    
+    .popup-content {
+      background-color: #fff;
+      border-radius: 16px 16px 0 0;
+      overflow: hidden;
+      width: 100%;
+      max-width: 414px;
+      margin: 0 auto;
+    }
+    
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .popup-title {
+      font-size: 17px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .popup-close {
+      font-size: 18px;
+      color: #999;
+    }
+    
+    .popup-body {
+      padding: 16px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    
+    .popup-form-item {
+      margin-bottom: 16px;
+    }
+    
+    .popup-form-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .popup-form-value {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .popup-form-radio {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .radio-option {
+      padding: 6px 12px;
+      border-radius: 4px;
+      background-color: #f5f5f5;
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .radio-option.selected {
+      background-color: #e3f2fd;
+      color: #2979ff;
+    }
+    
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      width: fit-content;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .quantity-btn {
+      width: 30px;
+      height: 30px;
+      background-color: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #666;
+    }
+    
+    .quantity-input {
+      width: 50px;
+      height: 30px;
+      border: none;
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    .popup-footer {
+      display: flex;
+      border-top: 1px solid #eee;
+    }
+    
+    .popup-btn {
+      flex: 1;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+    
+    .popup-btn-cancel {
+      background-color: #f5f5f5;
+      color: #666;
+    }
+    
+    .popup-btn-confirm {
+      background-color: #2979ff;
+      color: white;
+    }
+    
+    /* 底部导航栏 */
+    .tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background-color: #fff;
+      display: flex;
+      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+      max-width: 414px;
+      margin: 0 auto;
+      z-index: 100;
+      flex-shrink: 0; /* 防止收缩 */
+    }
+    
+    .tab-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #999;
+    }
+    
+    .tab-item.active {
+      color: #2979ff;
+    }
+    
+    .tab-icon {
+      margin-bottom: 3px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+      <div class="navbar-title">库存</div>
+    </div>
+    
+    <!-- 顶部数据统计 -->
+    <div class="header">
+      <div class="data-overview">
+        <div class="data-item">
+          <div class="data-value">248</div>
+          <div class="data-label">库存总数</div>
+        </div>
+        <div class="data-item">
+          <div class="data-value">56</div>
+          <div class="data-label">已开封</div>
+        </div>
+        <div class="data-item">
+          <div class="data-value">12</div>
+          <div class="data-label">预警商品</div>
+        </div>
+      </div>
+      
+      <!-- 快捷操作按钮 -->
+      <div class="quick-actions">
+        <div class="action-btn">
+          <div class="action-btn-icon">⬆️</div>
+          <div class="action-btn-text">批量入库</div>
+        </div>
+        <div class="action-btn">
+          <div class="action-btn-icon">⬇️</div>
+          <div class="action-btn-text">批量出库</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 内容区域 -->
+    <div class="content-area">
+      <!-- 库存列表 -->
+      <div class="stock-list">
+        <!-- 库存卡片 1 -->
+        <div class="stock-card">
+          <div class="stock-card-top">
+            <div class="stock-card-thumbnail">
+              <img class="stock-card-thumbnail-image" src="https://via.placeholder.com/80" alt="产品图片">
+            </div>
+            <div class="stock-card-info">
+              <div class="stock-card-info-goods">
+                <div class="stock-card-info-name">绝对伏特加</div>
+                <div class="stock-card-info-price">零售价格: ¥128.00</div>
+                <div class="stock-card-info-category">分类：酒水</div>
+              </div>
+              <div class="stock-card-info-stock">
+                <span class="stock-tag stock-tag-primary">库存：24</span>
+                <span class="stock-tag stock-tag-success">开封：6</span>
+              </div>
+            </div>
+          </div>
+          <div class="stock-card-bottom">
+            <div class="stock-card-button stock-card-button-warning">预警设置</div>
+            <div class="stock-card-right-buttons">
+              <div class="stock-card-button stock-card-button-in-out">入库/出库</div>
+              <div class="stock-card-button stock-card-button-open">开封</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 库存卡片 2 -->
+        <div class="stock-card">
+          <div class="stock-card-top">
+            <div class="stock-card-thumbnail">
+              <img class="stock-card-thumbnail-image" src="https://via.placeholder.com/80" alt="产品图片">
+            </div>
+            <div class="stock-card-info">
+              <div class="stock-card-info-goods">
+                <div class="stock-card-info-name">轩尼诗XO</div>
+                <div class="stock-card-info-price">零售价格: ¥1580.00</div>
+                <div class="stock-card-info-category">分类：洋酒</div>
+              </div>
+              <div class="stock-card-info-stock">
+                <span class="stock-tag stock-tag-primary">库存：12</span>
+                <span class="stock-tag stock-tag-success">开封：2</span>
+              </div>
+            </div>
+          </div>
+          <div class="stock-card-bottom">
+            <div class="stock-card-button stock-card-button-warning">预警设置</div>
+            <div class="stock-card-right-buttons">
+              <div class="stock-card-button stock-card-button-in-out">入库/出库</div>
+              <div class="stock-card-button stock-card-button-open">开封</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 库存卡片 3 -->
+        <div class="stock-card">
+          <div class="stock-card-top">
+            <div class="stock-card-thumbnail">
+              <img class="stock-card-thumbnail-image" src="https://via.placeholder.com/80" alt="产品图片">
+            </div>
+            <div class="stock-card-info">
+              <div class="stock-card-info-goods">
+                <div class="stock-card-info-name">百威啤酒</div>
+                <div class="stock-card-info-price">零售价格: ¥15.00</div>
+                <div class="stock-card-info-category">分类：啤酒</div>
+              </div>
+              <div class="stock-card-info-stock">
+                <span class="stock-tag stock-tag-primary">库存：48</span>
+                <span class="stock-tag stock-tag-success">开封：12</span>
+              </div>
+            </div>
+          </div>
+          <div class="stock-card-bottom">
+            <div class="stock-card-button stock-card-button-warning">预警设置</div>
+            <div class="stock-card-right-buttons">
+              <div class="stock-card-button stock-card-button-in-out">入库/出库</div>
+              <div class="stock-card-button stock-card-button-open">开封</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 添加更多库存卡片以展示滚动效果 -->
+        <div class="stock-card">
+          <div class="stock-card-top">
+            <div class="stock-card-thumbnail">
+              <img class="stock-card-thumbnail-image" src="https://via.placeholder.com/80" alt="产品图片">
+            </div>
+            <div class="stock-card-info">
+              <div class="stock-card-info-goods">
+                <div class="stock-card-info-name">马天尼</div>
+                <div class="stock-card-info-price">零售价格: ¥198.00</div>
+                <div class="stock-card-info-category">分类：利口酒</div>
+              </div>
+              <div class="stock-card-info-stock">
+                <span class="stock-tag stock-tag-primary">库存：18</span>
+                <span class="stock-tag stock-tag-success">开封：4</span>
+              </div>
+            </div>
+          </div>
+          <div class="stock-card-bottom">
+            <div class="stock-card-button stock-card-button-warning">预警设置</div>
+            <div class="stock-card-right-buttons">
+              <div class="stock-card-button stock-card-button-in-out">入库/出库</div>
+              <div class="stock-card-button stock-card-button-open">开封</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stock-card">
+          <div class="stock-card-top">
+            <div class="stock-card-thumbnail">
+              <img class="stock-card-thumbnail-image" src="https://via.placeholder.com/80" alt="产品图片">
+            </div>
+            <div class="stock-card-info">
+              <div class="stock-card-info-goods">
+                <div class="stock-card-info-name">人头马VSOP</div>
+                <div class="stock-card-info-price">零售价格: ¥560.00</div>
+                <div class="stock-card-info-category">分类：白兰地</div>
+              </div>
+              <div class="stock-card-info-stock">
+                <span class="stock-tag stock-tag-primary">库存：8</span>
+                <span class="stock-tag stock-tag-success">开封：3</span>
+              </div>
+            </div>
+          </div>
+          <div class="stock-card-bottom">
+            <div class="stock-card-button stock-card-button-warning">预警设置</div>
+            <div class="stock-card-right-buttons">
+              <div class="stock-card-button stock-card-button-in-out">入库/出库</div>
+              <div class="stock-card-button stock-card-button-open">开封</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stock-card">
+          <div class="stock-card-top">
+            <div class="stock-card-thumbnail">
+              <img class="stock-card-thumbnail-image" src="https://via.placeholder.com/80" alt="产品图片">
+            </div>
+            <div class="stock-card-info">
+              <div class="stock-card-info-goods">
+                <div class="stock-card-info-name">尊尼获加黑牌</div>
+                <div class="stock-card-info-price">零售价格: ¥420.00</div>
+                <div class="stock-card-info-category">分类：威士忌</div>
+              </div>
+              <div class="stock-card-info-stock">
+                <span class="stock-tag stock-tag-primary">库存：10</span>
+                <span class="stock-tag stock-tag-success">开封：2</span>
+              </div>
+            </div>
+          </div>
+          <div class="stock-card-bottom">
+            <div class="stock-card-button stock-card-button-warning">预警设置</div>
+            <div class="stock-card-right-buttons">
+              <div class="stock-card-button stock-card-button-in-out">入库/出库</div>
+              <div class="stock-card-button stock-card-button-open">开封</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stock-card">
+          <div class="stock-card-top">
+            <div class="stock-card-thumbnail">
+              <img class="stock-card-thumbnail-image" src="https://via.placeholder.com/80" alt="产品图片">
+            </div>
+            <div class="stock-card-info">
+              <div class="stock-card-info-goods">
+                <div class="stock-card-info-name">灰雁伏特加</div>
+                <div class="stock-card-info-price">零售价格: ¥280.00</div>
+                <div class="stock-card-info-category">分类：伏特加</div>
+              </div>
+              <div class="stock-card-info-stock">
+                <span class="stock-tag stock-tag-primary">库存：15</span>
+                <span class="stock-tag stock-tag-success">开封：5</span>
+              </div>
+            </div>
+          </div>
+          <div class="stock-card-bottom">
+            <div class="stock-card-button stock-card-button-warning">预警设置</div>
+            <div class="stock-card-right-buttons">
+              <div class="stock-card-button stock-card-button-in-out">入库/出库</div>
+              <div class="stock-card-button stock-card-button-open">开封</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stock-card">
+          <div class="stock-card-top">
+            <div class="stock-card-thumbnail">
+              <img class="stock-card-thumbnail-image" src="https://via.placeholder.com/80" alt="产品图片">
+            </div>
+            <div class="stock-card-info">
+              <div class="stock-card-info-goods">
+                <div class="stock-card-info-name">百加得朗姆酒</div>
+                <div class="stock-card-info-price">零售价格: ¥168.00</div>
+                <div class="stock-card-info-category">分类：朗姆酒</div>
+              </div>
+              <div class="stock-card-info-stock">
+                <span class="stock-tag stock-tag-primary">库存：20</span>
+                <span class="stock-tag stock-tag-success">开封：3</span>
+              </div>
+            </div>
+          </div>
+          <div class="stock-card-bottom">
+            <div class="stock-card-button stock-card-button-warning">预警设置</div>
+            <div class="stock-card-right-buttons">
+              <div class="stock-card-button stock-card-button-in-out">入库/出库</div>
+              <div class="stock-card-button stock-card-button-open">开封</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 入库/出库弹窗 (示例，默认隐藏) -->
+    <div class="popup" style="display: none;">
+      <div class="popup-content">
+        <div class="popup-header">
+          <div class="popup-title">入库/出库</div>
+          <div class="popup-close">✕</div>
+        </div>
+        <div class="popup-body">
+          <div class="popup-form-item">
+            <div class="popup-form-label">商品名称</div>
+            <div class="popup-form-value">绝对伏特加</div>
+          </div>
+          <div class="popup-form-item">
+            <div class="popup-form-label">操作类型</div>
+            <div class="popup-form-radio">
+              <div class="radio-option selected">入库</div>
+              <div class="radio-option">出库</div>
+            </div>
+          </div>
+          <div class="popup-form-item">
+            <div class="popup-form-label">入库数量</div>
+            <div class="quantity-control">
+              <div class="quantity-btn">-</div>
+              <input type="text" class="quantity-input" value="1">
+              <div class="quantity-btn">+</div>
+            </div>
+          </div>
+        </div>
+        <div class="popup-footer">
+          <div class="popup-btn popup-btn-cancel">取消</div>
+          <div class="popup-btn popup-btn-confirm">确定</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 底部导航栏 -->
+    <div class="tabbar">
+      <div class="tab-item">
+        <div class="tab-icon">首</div>
+        <div>首页</div>
+      </div>
+      <div class="tab-item active">
+        <div class="tab-icon">库</div>
+        <div>库存</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">商</div>
+        <div>商品</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">我</div>
+        <div>我的</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html> 

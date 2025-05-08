@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品管理</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    body {
+      background-color: #f6f6f6;
+      color: #333;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden; /* 禁止body滚动 */
+    }
+    
+    .container {
+      max-width: 414px;
+      margin: 0 auto;
+      background-color: #f6f6f6;
+      height: 100vh; /* 固定高度 */
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* 禁止整体容器滚动 */
+    }
+    
+    /* 顶部导航栏 */
+    .navbar {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      background-color: #1565c0;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 16px;
+      width: 100%;
+      flex-shrink: 0; /* 防止收缩 */
+    }
+    
+    .navbar-back {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    
+    .navbar-title {
+      font-size: 17px;
+      font-weight: 500;
+      flex: 1;
+      text-align: center;
+      margin-right: 28px;
+    }
+    
+    /* 顶部背景 */
+    .header {
+      background: linear-gradient(180deg, #1565c0 0%, #1565c0 10%, #2979ff 100%);
+      color: white;
+      padding: 0 16px 20px;
+      width: 100%;
+      margin-top: -1px; /* 消除navbar和header之间的分隔线 */
+      flex-shrink: 0; /* 防止收缩 */
+    }
+    
+    /* 搜索栏 */
+    .search-bar {
+      display: flex;
+      padding: 12px 0;
+    }
+    
+    .search-input-container {
+      display: flex;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 0 15px;
+      flex: 1;
+      height: 36px;
+    }
+    
+    .search-icon {
+      margin-right: 8px;
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .search-input {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 14px;
+      flex: 1;
+      outline: none;
+    }
+    
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .filter-button {
+      margin-left: 10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 18px;
+      background-color: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+    }
+    
+    /* 内容区域 */
+    .content-area {
+      width: 100%;
+      background: linear-gradient(180deg, #f0f7ff 0%, #f8fbff 50%, #ffffff 100%);
+      border-radius: 16px 16px 0 0;
+      margin-top: -16px;
+      padding: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* 防止整体滚动 */
+    }
+    
+    /* 商品列表 */
+    .goods-list {
+      padding: 10px 0;
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 70px; /* 留出底部空间 */
+      /* 隐藏滚动条 */
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    
+    .goods-list::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    
+    /* 商品卡片 - 优化布局 */
+    .goods-card {
+      display: flex;
+      background-color: #fff;
+      padding: 10px 12px;
+      border-bottom: 0.5px solid #eee;
+      margin: 0 12px 8px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      align-items: center; /* 垂直居中对齐 */
+    }
+    
+    .goods-card-thumbnail {
+      width: 70px;
+      height: 70px;
+      border-radius: 6px;
+      background-color: #f5f5f5;
+      overflow: hidden;
+      flex-shrink: 0; /* 防止图片被压缩 */
+    }
+    
+    .goods-card-thumbnail-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .goods-card-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding-left: 12px;
+      min-height: 70px; /* 与图片保持相同高度 */
+      justify-content: space-between; /* 均匀分布内容 */
+    }
+    
+    .goods-card-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .goods-card-details {
+      display: flex;
+      flex-wrap: wrap; /* 允许内容换行 */
+    }
+    
+    .goods-card-detail-item {
+      font-size: 12px;
+      color: #999;
+      margin-right: 8px;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .goods-card-detail-item:before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      background-color: #2979ff;
+      border-radius: 50%;
+      margin-right: 4px;
+    }
+    
+    .goods-card-price {
+      font-size: 13px;
+      color: #f44336;
+      margin-top: 4px; /* 添加一点顶部间距 */
+    }
+    
+    /* 添加按钮 */
+    .fab-button {
+      position: fixed;
+      bottom: 70px;
+      right: 16px;
+      width: 56px;
+      height: 56px;
+      border-radius: 28px;
+      background-color: #2979ff;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* 底部导航栏 */
+    .tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background-color: #fff;
+      display: flex;
+      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+      max-width: 414px;
+      margin: 0 auto;
+      z-index: 100;
+      flex-shrink: 0; /* 防止收缩 */
+    }
+    
+    .tab-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #999;
+    }
+    
+    .tab-item.active {
+      color: #2979ff;
+    }
+    
+    .tab-icon {
+      margin-bottom: 3px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* 高级搜索面板 */
+    .advanced-search-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      display: none;
+    }
+    
+    .advanced-search-panel.show {
+      display: block;
+    }
+    
+    .search-panel-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #fff;
+      border-radius: 16px 16px 0 0;
+      padding: 20px 16px;
+      max-width: 414px;
+      margin: 0 auto;
+      max-height: 70%;
+      overflow-y: auto;
+    }
+    
+    .search-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .search-panel-title {
+      font-size: 16px;
+      font-weight: 500;
+    }
+    
+    .search-panel-close {
+      font-size: 20px;
+      color: #999;
+    }
+    
+    .search-form-group {
+      margin-bottom: 16px;
+    }
+    
+    .search-form-label {
+      display: block;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    
+    .search-form-input {
+      width: 100%;
+      height: 40px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0 12px;
+      font-size: 14px;
+      outline: none;
+    }
+    
+    .search-form-input:focus {
+      border-color: #2979ff;
+    }
+    
+    .supplier-selector {
+      position: relative;
+    }
+    
+    .supplier-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .supplier-dropdown.show {
+      display: block;
+    }
+    
+    .supplier-item {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .supplier-item:last-child {
+      border-bottom: none;
+    }
+    
+    .supplier-item:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .search-btn-group {
+      display: flex;
+      margin-top: 20px;
+    }
+    
+    .search-btn {
+      flex: 1;
+      height: 44px;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+    
+    .search-reset-btn {
+      background-color: #f5f5f5;
+      color: #666;
+      margin-right: 12px;
+    }
+    
+    .search-submit-btn {
+      background-color: #2979ff;
+      color: white;
+    }
+
+    /* 无数据提示 */
+    .no-data {
+      text-align: center;
+      color: #bbb;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+      <div class="navbar-back">←</div>
+      <div class="navbar-title">商品管理</div>
+    </div>
+    
+    <!-- 顶部搜索区域 -->
+    <div class="header">
+      <!-- 搜索栏 -->
+      <div class="search-bar">
+        <div class="search-input-container">
+          <div class="search-icon">🔍</div>
+          <input type="text" class="search-input" placeholder="搜索商品名称">
+        </div>
+        <div class="filter-button" id="openAdvancedSearch">⚙️</div>
+      </div>
+    </div>
+    
+    <!-- 内容区域 -->
+    <div class="content-area">
+      <!-- 商品列表 -->
+      <div class="goods-list">
+        <!-- 商品卡片 1 -->
+        <div class="goods-card">
+          <div class="goods-card-thumbnail">
+            <img class="goods-card-thumbnail-image" src="https://via.placeholder.com/80" alt="商品图片">
+          </div>
+          <div class="goods-card-info">
+            <div class="goods-card-name">绝对伏特加</div>
+            <div class="goods-card-details">
+              <div class="goods-card-detail-item">洋酒</div>
+              <div class="goods-card-detail-item">Absolut</div>
+              <div class="goods-card-detail-item">酒类直供</div>
+            </div>
+            <div class="goods-card-price">参考价格：¥128.00</div>
+          </div>
+        </div>
+        
+        <!-- 商品卡片 2 -->
+        <div class="goods-card">
+          <div class="goods-card-thumbnail">
+            <img class="goods-card-thumbnail-image" src="https://via.placeholder.com/80" alt="商品图片">
+          </div>
+          <div class="goods-card-info">
+            <div class="goods-card-name">轩尼诗XO</div>
+            <div class="goods-card-details">
+              <div class="goods-card-detail-item">洋酒</div>
+              <div class="goods-card-detail-item">Hennessy</div>
+              <div class="goods-card-detail-item">进口酒行</div>
+            </div>
+            <div class="goods-card-price">参考价格：¥1580.00</div>
+          </div>
+        </div>
+        
+        <!-- 商品卡片 3 -->
+        <div class="goods-card">
+          <div class="goods-card-thumbnail">
+            <img class="goods-card-thumbnail-image" src="https://via.placeholder.com/80" alt="商品图片">
+          </div>
+          <div class="goods-card-info">
+            <div class="goods-card-name">百威啤酒</div>
+            <div class="goods-card-details">
+              <div class="goods-card-detail-item">啤酒</div>
+              <div class="goods-card-detail-item">Budweiser</div>
+              <div class="goods-card-detail-item">本地批发</div>
+            </div>
+            <div class="goods-card-price">参考价格：¥15.00</div>
+          </div>
+        </div>
+        
+        <!-- 商品卡片 4 -->
+        <div class="goods-card">
+          <div class="goods-card-thumbnail">
+            <img class="goods-card-thumbnail-image" src="https://via.placeholder.com/80" alt="商品图片">
+          </div>
+          <div class="goods-card-info">
+            <div class="goods-card-name">五粮液</div>
+            <div class="goods-card-details">
+              <div class="goods-card-detail-item">白酒</div>
+              <div class="goods-card-detail-item">五粮液</div>
+              <div class="goods-card-detail-item">官方代理</div>
+            </div>
+            <div class="goods-card-price">参考价格：¥998.00</div>
+          </div>
+        </div>
+        
+        <!-- 商品卡片 5 -->
+        <div class="goods-card">
+          <div class="goods-card-thumbnail">
+            <img class="goods-card-thumbnail-image" src="https://via.placeholder.com/80" alt="商品图片">
+          </div>
+          <div class="goods-card-info">
+            <div class="goods-card-name">拉菲红酒</div>
+            <div class="goods-card-details">
+              <div class="goods-card-detail-item">红酒</div>
+              <div class="goods-card-detail-item">Lafite</div>
+              <div class="goods-card-detail-item">酒窖名品</div>
+            </div>
+            <div class="goods-card-price">参考价格：¥2580.00</div>
+          </div>
+        </div>
+        
+        <!-- 商品卡片 6 -->
+        <div class="goods-card">
+          <div class="goods-card-thumbnail">
+            <img class="goods-card-thumbnail-image" src="https://via.placeholder.com/80" alt="商品图片">
+          </div>
+          <div class="goods-card-info">
+            <div class="goods-card-name">莫吉托预调酒</div>
+            <div class="goods-card-details">
+              <div class="goods-card-detail-item">鸡尾酒</div>
+              <div class="goods-card-detail-item">Bacardi</div>
+              <div class="goods-card-detail-item">进口酒行</div>
+            </div>
+            <div class="goods-card-price">参考价格：¥68.00</div>
+          </div>
+        </div>
+        
+        <!-- 商品卡片 7 -->
+        <div class="goods-card">
+          <div class="goods-card-thumbnail">
+            <img class="goods-card-thumbnail-image" src="https://via.placeholder.com/80" alt="商品图片">
+          </div>
+          <div class="goods-card-info">
+            <div class="goods-card-name">马爹利蓝带</div>
+            <div class="goods-card-details">
+              <div class="goods-card-detail-item">洋酒</div>
+              <div class="goods-card-detail-item">Martell</div>
+              <div class="goods-card-detail-item">进口酒行</div>
+            </div>
+            <div class="goods-card-price">参考价格：¥1050.00</div>
+          </div>
+        </div>
+        
+        <!-- 商品卡片 8 -->
+        <div class="goods-card">
+          <div class="goods-card-thumbnail">
+            <img class="goods-card-thumbnail-image" src="https://via.placeholder.com/80" alt="商品图片">
+          </div>
+          <div class="goods-card-info">
+            <div class="goods-card-name">安佳牛奶</div>
+            <div class="goods-card-details">
+              <div class="goods-card-detail-item">其他</div>
+              <div class="goods-card-detail-item">Anchor</div>
+              <div class="goods-card-detail-item">食品供应商</div>
+            </div>
+            <div class="goods-card-price">参考价格：¥25.00</div>
+          </div>
+        </div>
+        
+        <!-- 商品卡片 9 -->
+        <div class="goods-card">
+          <div class="goods-card-thumbnail">
+            <img class="goods-card-thumbnail-image" src="https://via.placeholder.com/80" alt="商品图片">
+          </div>
+          <div class="goods-card-info">
+            <div class="goods-card-name">百加得朗姆酒</div>
+            <div class="goods-card-details">
+              <div class="goods-card-detail-item">洋酒</div>
+              <div class="goods-card-detail-item">Bacardi</div>
+              <div class="goods-card-detail-item">进口酒行</div>
+            </div>
+            <div class="goods-card-price">参考价格：¥168.00</div>
+          </div>
+        </div>
+        
+        <!-- 商品卡片 10 -->
+        <div class="goods-card">
+          <div class="goods-card-thumbnail">
+            <img class="goods-card-thumbnail-image" src="https://via.placeholder.com/80" alt="商品图片">
+          </div>
+          <div class="goods-card-info">
+            <div class="goods-card-name">1664啤酒</div>
+            <div class="goods-card-details">
+              <div class="goods-card-detail-item">啤酒</div>
+              <div class="goods-card-detail-item">Kronenbourg</div>
+              <div class="goods-card-detail-item">本地批发</div>
+            </div>
+            <div class="goods-card-price">参考价格：¥25.00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 添加按钮 -->
+    <div class="fab-button">+</div>
+    
+    <!-- 底部导航栏 -->
+    <div class="tabbar">
+      <div class="tab-item">
+        <div class="tab-icon">首</div>
+        <div>首页</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">库</div>
+        <div>库存</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">采</div>
+        <div>采购</div>
+      </div>
+      <div class="tab-item active">
+        <div class="tab-icon">商</div>
+        <div>商品</div>
+      </div>
+    </div>
+    
+    <!-- 高级搜索面板 -->
+    <div class="advanced-search-panel" id="advancedSearchPanel">
+      <div class="search-panel-content">
+        <div class="search-panel-header">
+          <div class="search-panel-title">高级搜索</div>
+          <div class="search-panel-close" id="closeAdvancedSearch">×</div>
+        </div>
+        
+        <div class="search-form-group">
+          <label class="search-form-label">商品名称</label>
+          <input type="text" class="search-form-input" placeholder="请输入商品名称关键词">
+        </div>
+        
+        <div class="search-form-group">
+          <label class="search-form-label">商品分类</label>
+          <input type="text" class="search-form-input" placeholder="请输入商品分类">
+        </div>
+        
+        <div class="search-form-group">
+          <label class="search-form-label">品牌</label>
+          <input type="text" class="search-form-input" placeholder="请输入品牌名称">
+        </div>
+        
+        <div class="search-form-group">
+          <label class="search-form-label">供应商</label>
+          <div class="supplier-selector">
+            <input type="text" class="search-form-input" placeholder="请选择供应商" id="supplierInput" readonly>
+            <div class="supplier-dropdown" id="supplierDropdown">
+              <div class="supplier-item" data-id="1">酒类直供</div>
+              <div class="supplier-item" data-id="2">进口酒行</div>
+              <div class="supplier-item" data-id="3">本地批发</div>
+              <div class="supplier-item" data-id="4">官方代理</div>
+              <div class="supplier-item" data-id="5">酒窖名品</div>
+              <div class="supplier-item" data-id="6">餐饮供应链</div>
+              <div class="supplier-item" data-id="7">综合贸易</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="search-btn-group">
+          <div class="search-btn search-reset-btn">重置</div>
+          <div class="search-btn search-submit-btn">搜索</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // 高级搜索面板控制
+    document.getElementById('openAdvancedSearch').addEventListener('click', function() {
+      document.getElementById('advancedSearchPanel').classList.add('show');
+    });
+    
+    document.getElementById('closeAdvancedSearch').addEventListener('click', function() {
+      document.getElementById('advancedSearchPanel').classList.remove('show');
+    });
+    
+    // 供应商下拉选择
+    document.getElementById('supplierInput').addEventListener('click', function() {
+      document.getElementById('supplierDropdown').classList.toggle('show');
+    });
+    
+    // 选择供应商
+    var supplierItems = document.querySelectorAll('.supplier-item');
+    for (var i = 0; i < supplierItems.length; i++) {
+      supplierItems[i].addEventListener('click', function() {
+        document.getElementById('supplierInput').value = this.textContent;
+        document.getElementById('supplierDropdown').classList.remove('show');
+      });
+    }
+    
+    // 点击其他地方关闭下拉框
+    document.addEventListener('click', function(e) {
+      if (!e.target.matches('#supplierInput') && !e.target.matches('.supplier-item')) {
+        document.getElementById('supplierDropdown').classList.remove('show');
+      }
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>采购管理</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    body {
+      background-color: #f6f6f6;
+      color: #333;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden; /* 禁止body滚动 */
+    }
+    
+    .container {
+      max-width: 414px;
+      margin: 0 auto;
+      background-color: #f6f6f6;
+      height: 100vh; /* 固定高度 */
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* 禁止整体容器滚动 */
+    }
+    
+    /* 顶部导航栏 */
+    .navbar {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      background-color: #1565c0;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 16px;
+      width: 100%;
+      flex-shrink: 0; /* 防止收缩 */
+    }
+    
+    .navbar-title {
+      font-size: 17px;
+      font-weight: 500;
+      flex: 1;
+      text-align: center;
+    }
+    
+    /* 顶部数据统计 */
+    .header {
+      background: linear-gradient(180deg, #1565c0 0%, #1565c0 10%, #2979ff 100%);
+      color: white;
+      padding: 0 16px 30px;
+      width: 100%;
+      margin-top: -1px; /* 消除navbar和header之间的分隔线 */
+      flex-shrink: 0; /* 防止收缩 */
+    }
+    
+    .data-overview {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 0;
+    }
+    
+    .data-item {
+      flex: 1;
+      text-align: center;
+      padding: 8px 0;
+      position: relative;
+    }
+    
+    .data-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 25%;
+      height: 50%;
+      width: 1px;
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .data-value {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    
+    .data-label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    /* 搜索栏 */
+    .search-bar {
+      display: flex;
+      padding: 0 16px 16px;
+    }
+    
+    .search-input-container {
+      display: flex;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 0 15px;
+      flex: 1;
+      height: 36px;
+    }
+    
+    .search-icon {
+      margin-right: 8px;
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .search-input {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 14px;
+      flex: 1;
+      outline: none;
+    }
+    
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .filter-button {
+      margin-left: 10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 18px;
+      background-color: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+    }
+    
+    /* 内容区域 */
+    .content-area {
+      width: 100%;
+      background: linear-gradient(180deg, #f0f7ff 0%, #f8fbff 50%, #ffffff 100%);
+      border-radius: 16px 16px 0 0;
+      margin-top: -16px;
+      padding: 10px 0 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* 防止整体滚动 */
+    }
+    
+    /* 采购订单列表 */
+    .purchase-list {
+      padding: 10px 12px;
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 70px; /* 留出底部空间 */
+      /* 隐藏滚动条 */
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    
+    .purchase-list::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    
+    /* 采购订单卡片 */
+    .purchase-card {
+      margin-bottom: 12px;
+      background-color: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .purchase-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    
+    .purchase-card-supplier {
+      font-size: 15px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .purchase-card-status {
+      font-size: 13px;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    
+    .status-pending {
+      background-color: #fff8e1;
+      color: #ffa000;
+    }
+    
+    .status-confirmed {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+    
+    .status-shipping {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .status-completed {
+      background-color: #e0f2f1;
+      color: #00897b;
+    }
+    
+    .purchase-card-content {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    
+    .purchase-item {
+      display: flex;
+      margin-bottom: 10px;
+    }
+    
+    .purchase-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .purchase-item-thumbnail {
+      width: 50px;
+      height: 50px;
+      border-radius: 6px;
+      background-color: #f5f5f5;
+      margin-right: 10px;
+      overflow: hidden;
+    }
+    
+    .purchase-item-thumbnail-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .purchase-item-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .purchase-item-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 3px;
+    }
+    
+    .purchase-item-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .purchase-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+    }
+    
+    .purchase-total {
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .purchase-total-amount {
+      font-weight: 500;
+      color: #f44336;
+    }
+    
+    .purchase-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .action-button {
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    
+    .action-primary {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+    
+    .action-secondary {
+      background-color: #f5f5f5;
+      color: #666;
+    }
+    
+    /* 添加按钮 */
+    .fab-button {
+      position: fixed;
+      bottom: 70px;
+      right: 16px;
+      width: 56px;
+      height: 56px;
+      border-radius: 28px;
+      background-color: #2979ff;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* 底部导航栏 */
+    .tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background-color: #fff;
+      display: flex;
+      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+      max-width: 414px;
+      margin: 0 auto;
+      z-index: 100;
+      flex-shrink: 0; /* 防止收缩 */
+    }
+    
+    .tab-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #999;
+    }
+    
+    .tab-item.active {
+      color: #2979ff;
+    }
+    
+    .tab-icon {
+      margin-bottom: 3px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* 多商品卡片 */
+    .purchase-item-grid {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 0 -5px;
+    }
+    
+    .purchase-item-grid-item {
+      width: 33.333%;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+    
+    .grid-item-content {
+      background-color: #f9f9f9;
+      border-radius: 6px;
+      padding: 8px;
+      height: 100%;
+    }
+    
+    .grid-item-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .grid-item-meta {
+      font-size: 10px;
+      color: #666;
+    }
+    
+    .purchase-item-summary {
+      margin-top: 10px;
+      background-color: #f5f5f5;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+    }
+    
+    .fold-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      font-size: 12px;
+      color: #2979ff;
+      cursor: pointer;
+    }
+    
+    .fold-toggle-icon {
+      margin-left: 4px;
+    }
+    
+    .purchase-item-horizontal {
+      display: flex;
+      overflow-x: auto;
+      padding: 8px 0;
+      margin: 0 -5px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Firefox */
+    }
+    
+    .purchase-item-horizontal::-webkit-scrollbar {
+      display: none; /* Chrome, Safari */
+    }
+    
+    .purchase-item-horizontal-item {
+      flex: 0 0 120px;
+      padding: 0 5px;
+    }
+    
+    .horizontal-item-content {
+      background-color: #f9f9f9;
+      border-radius: 6px;
+      padding: 8px;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+      <div class="navbar-title">采购管理</div>
+    </div>
+    
+    <!-- 顶部数据统计 -->
+    <div class="header">
+      <div class="data-overview">
+        <div class="data-item">
+          <div class="data-value">12</div>
+          <div class="data-label">待处理</div>
+        </div>
+        <div class="data-item">
+          <div class="data-value">8</div>
+          <div class="data-label">待收货</div>
+        </div>
+        <div class="data-item">
+          <div class="data-value">¥9,521</div>
+          <div class="data-label">本月采购额</div>
+        </div>
+      </div>
+      
+      <!-- 搜索栏 -->
+      <div class="search-bar">
+        <div class="search-input-container">
+          <div class="search-icon">🔍</div>
+          <input type="text" class="search-input" placeholder="搜索订单">
+        </div>
+        <div class="filter-button">⚙️</div>
+      </div>
+    </div>
+    
+    <!-- 内容区域 -->
+    <div class="content-area">
+      <!-- 采购订单列表 -->
+      <div class="purchase-list">
+        <!-- 方案2：水平滚动列表展示卡片 -->
+        <div class="purchase-card">
+          <div class="purchase-card-header">
+            <div class="purchase-card-supplier">广州酒类直供中心</div>
+            <div class="purchase-card-status status-shipping">配送中</div>
+          </div>
+          <div class="purchase-card-content">
+            <div style="margin-bottom: 8px;">
+              <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+                <span style="color: #666; font-size: 12px; font-style: italic;">← 左右滑动查看更多 →</span>
+              </div>
+              <div class="purchase-item-horizontal">
+                <div class="purchase-item-horizontal-item">
+                  <div class="horizontal-item-content">
+                    <div class="grid-item-name">轩尼诗VSOP</div>
+                    <div class="grid-item-meta">8瓶 × ¥420</div>
+                  </div>
+                </div>
+                <div class="purchase-item-horizontal-item">
+                  <div class="horizontal-item-content">
+                    <div class="grid-item-name">马爹利XO</div>
+                    <div class="grid-item-meta">4瓶 × ¥1580</div>
+                  </div>
+                </div>
+                <div class="purchase-item-horizontal-item">
+                  <div class="horizontal-item-content">
+                    <div class="grid-item-name">皇家礼炮21年</div>
+                    <div class="grid-item-meta">2瓶 × ¥2830</div>
+                  </div>
+                </div>
+                <div class="purchase-item-horizontal-item">
+                  <div class="horizontal-item-content">
+                    <div class="grid-item-name">百龄坛特醇</div>
+                    <div class="grid-item-meta">6瓶 × ¥380</div>
+                  </div>
+                </div>
+                <div class="purchase-item-horizontal-item">
+                  <div class="horizontal-item-content">
+                    <div class="grid-item-name">格兰菲迪12年</div>
+                    <div class="grid-item-meta">5瓶 × ¥420</div>
+                  </div>
+                </div>
+                <div class="purchase-item-horizontal-item">
+                  <div class="horizontal-item-content">
+                    <div class="grid-item-name">起泡酒</div>
+                    <div class="grid-item-meta">16瓶 × ¥198</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="purchase-item-summary">
+              共12种商品，总计54件
+            </div>
+          </div>
+          <div class="purchase-card-footer">
+            <div class="purchase-total">总计: <span class="purchase-total-amount">¥16,528.00</span></div>
+            <div class="purchase-actions">
+              <div class="action-button action-primary">确认收货</div>
+              <div class="action-button action-secondary">查看详情</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 采购订单卡片1 -->
+        <div class="purchase-card">
+          <div class="purchase-card-header">
+            <div class="purchase-card-supplier">海信酒水供应商</div>
+            <div class="purchase-card-status status-pending">待确认</div>
+          </div>
+          <div class="purchase-card-content">
+            <div class="purchase-item">
+              <div class="purchase-item-thumbnail">
+                <img class="purchase-item-thumbnail-image" src="https://via.placeholder.com/50" alt="产品图片">
+              </div>
+              <div class="purchase-item-info">
+                <div class="purchase-item-name">绝对伏特加</div>
+                <div class="purchase-item-meta">
+                  <div>数量: 12瓶</div>
+                  <div>单价: ¥128.00</div>
+                </div>
+              </div>
+            </div>
+            <div class="purchase-item">
+              <div class="purchase-item-thumbnail">
+                <img class="purchase-item-thumbnail-image" src="https://via.placeholder.com/50" alt="产品图片">
+              </div>
+              <div class="purchase-item-info">
+                <div class="purchase-item-name">轩尼诗XO</div>
+                <div class="purchase-item-meta">
+                  <div>数量: 6瓶</div>
+                  <div>单价: ¥1280.00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="purchase-card-footer">
+            <div class="purchase-total">总计: <span class="purchase-total-amount">¥9,216.00</span></div>
+            <div class="purchase-actions">
+              <div class="action-button action-primary">确认采购</div>
+              <div class="action-button action-secondary">查看详情</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 采购订单卡片2 -->
+        <div class="purchase-card">
+          <div class="purchase-card-header">
+            <div class="purchase-card-supplier">深圳酒业公司</div>
+            <div class="purchase-card-status status-confirmed">已确认</div>
+          </div>
+          <div class="purchase-card-content">
+            <div class="purchase-item">
+              <div class="purchase-item-thumbnail">
+                <img class="purchase-item-thumbnail-image" src="https://via.placeholder.com/50" alt="产品图片">
+              </div>
+              <div class="purchase-item-info">
+                <div class="purchase-item-name">百威啤酒</div>
+                <div class="purchase-item-meta">
+                  <div>数量: 48瓶</div>
+                  <div>单价: ¥15.00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="purchase-card-footer">
+            <div class="purchase-total">总计: <span class="purchase-total-amount">¥720.00</span></div>
+            <div class="purchase-actions">
+              <div class="action-button action-primary">上传发货单</div>
+              <div class="action-button action-secondary">查看详情</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 采购订单卡片3 -->
+        <div class="purchase-card">
+          <div class="purchase-card-header">
+            <div class="purchase-card-supplier">广州酒水批发</div>
+            <div class="purchase-card-status status-shipping">配送中</div>
+          </div>
+          <div class="purchase-card-content">
+            <div class="purchase-item">
+              <div class="purchase-item-thumbnail">
+                <img class="purchase-item-thumbnail-image" src="https://via.placeholder.com/50" alt="产品图片">
+              </div>
+              <div class="purchase-item-info">
+                <div class="purchase-item-name">人头马VSOP</div>
+                <div class="purchase-item-meta">
+                  <div>数量: 6瓶</div>
+                  <div>单价: ¥560.00</div>
+                </div>
+              </div>
+            </div>
+            <div class="purchase-item">
+              <div class="purchase-item-thumbnail">
+                <img class="purchase-item-thumbnail-image" src="https://via.placeholder.com/50" alt="产品图片">
+              </div>
+              <div class="purchase-item-info">
+                <div class="purchase-item-name">芝华士12年</div>
+                <div class="purchase-item-meta">
+                  <div>数量: 8瓶</div>
+                  <div>单价: ¥320.00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="purchase-card-footer">
+            <div class="purchase-total">总计: <span class="purchase-total-amount">¥5,920.00</span></div>
+            <div class="purchase-actions">
+              <div class="action-button action-primary">确认收货</div>
+              <div class="action-button action-secondary">查看物流</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 采购订单卡片4 -->
+        <div class="purchase-card">
+          <div class="purchase-card-header">
+            <div class="purchase-card-supplier">上海酒水贸易有限公司</div>
+            <div class="purchase-card-status status-completed">已完成</div>
+          </div>
+          <div class="purchase-card-content">
+            <div class="purchase-item">
+              <div class="purchase-item-thumbnail">
+                <img class="purchase-item-thumbnail-image" src="https://via.placeholder.com/50" alt="产品图片">
+              </div>
+              <div class="purchase-item-info">
+                <div class="purchase-item-name">马爹利蓝带</div>
+                <div class="purchase-item-meta">
+                  <div>数量: 4瓶</div>
+                  <div>单价: ¥1050.00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="purchase-card-footer">
+            <div class="purchase-total">总计: <span class="purchase-total-amount">¥4,200.00</span></div>
+            <div class="purchase-actions">
+              <div class="action-button action-primary">订单入库</div>
+              <div class="action-button action-secondary">查看详情</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 添加按钮 -->
+    <div class="fab-button">+</div>
+    
+    <!-- 底部导航栏 -->
+    <div class="tabbar">
+      <div class="tab-item">
+        <div class="tab-icon">首</div>
+        <div>首页</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">库</div>
+        <div>库存</div>
+      </div>
+      <div class="tab-item active">
+        <div class="tab-icon">采</div>
+        <div>采购</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">我</div>
+        <div>我的</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html> 

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>批量录入库存</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    body {
+      background-color: #f6f6f6;
+      color: #333;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    .container {
+      max-width: 414px;
+      margin: 0 auto;
+      background-color: #f6f6f6;
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    /* 顶部导航栏 */
+    .navbar {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      background-color: #1565c0;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 16px;
+      width: 100%;
+    }
+    
+    .navbar-back {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    
+    .navbar-title {
+      font-size: 17px;
+      font-weight: 500;
+      flex: 1;
+      text-align: center;
+      margin-right: 28px;
+    }
+    
+    /* 内容区域 */
+    .content-area {
+      width: 100%;
+      background: linear-gradient(180deg, #f0f7ff 0%, #f8fbff 50%, #ffffff 100%);
+      border-radius: 16px 16px 0 0;
+      margin-top: -12px;
+      padding-top: 20px;
+      padding-bottom: 70px;
+      min-height: calc(100vh - 32px);
+    }
+    
+    /* 批量导入选项 */
+    .import-options {
+      margin: 0 12px 16px;
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: #333;
+    }
+    
+    .import-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 44px;
+      background-color: #f0f0f0;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .import-btn.primary {
+      background-color: #2979ff;
+      color: white;
+    }
+    
+    .import-icon {
+      margin-right: 8px;
+      font-size: 18px;
+    }
+    
+    .import-tip {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+    }
+    
+    /* 扫码录入区域 */
+    .scan-section {
+      margin: 0 12px 16px;
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .scan-icon {
+      width: 60px;
+      height: 60px;
+      background-color: #e3f2fd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      color: #2979ff;
+      font-size: 24px;
+    }
+    
+    .scan-text {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+    }
+    
+    /* 手动录入表格 */
+    .manual-input {
+      margin: 0 12px 16px;
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .table-header {
+      display: flex;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .table-row {
+      display: flex;
+      padding: 8px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    
+    .table-cell {
+      padding: 0 4px;
+    }
+    
+    .col-select {
+      flex: 0 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .col-product {
+      flex: 2;
+    }
+    
+    .col-quantity {
+      flex: 1;
+    }
+    
+    .col-type {
+      flex: 1;
+    }
+    
+    .col-action {
+      flex: 0 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .delete-btn {
+      color: #ff5252;
+      font-size: 16px;
+    }
+    
+    .input-field {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+    
+    .quantity-stepper {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+    
+    .quantity-btn {
+      width: 24px;
+      height: 24px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    
+    .quantity-input {
+      width: 40px;
+      text-align: center;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      margin: 0 4px;
+    }
+    
+    .add-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      color: #2979ff;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    
+    .add-row-icon {
+      margin-right: 4px;
+      font-size: 16px;
+    }
+    
+    /* 底部按钮 */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      max-width: 414px;
+      margin: 0 auto;
+      display: flex;
+      padding: 8px 16px;
+      background-color: #fff;
+      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .submit-btn {
+      flex: 1;
+      height: 44px;
+      background-color: #2979ff;
+      color: white;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    
+    /* 弹窗 */
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .popup-content {
+      width: 80%;
+      max-width: 320px;
+      background-color: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .popup-header {
+      padding: 16px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .popup-body {
+      padding: 16px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    
+    .popup-footer {
+      display: flex;
+      border-top: 1px solid #eee;
+    }
+    
+    .popup-btn {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      font-size: 15px;
+    }
+    
+    .popup-btn.cancel {
+      color: #999;
+      border-right: 1px solid #eee;
+    }
+    
+    .popup-btn.confirm {
+      color: #2979ff;
+    }
+    
+    .product-select {
+      margin-bottom: 16px;
+    }
+    
+    .product-item {
+      display: flex;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      background-color: #f5f5f5;
+      align-items: center;
+    }
+    
+    .product-item-image {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      background-color: #ddd;
+      margin-right: 12px;
+    }
+    
+    .product-item-info {
+      flex: 1;
+    }
+    
+    .product-item-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .product-item-price {
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid #ddd;
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .checkbox.checked {
+      background-color: #2979ff;
+      border-color: #2979ff;
+      color: white;
+    }
+    
+    /* 模板下载提示 */
+    .template-tip {
+      display: flex;
+      align-items: center;
+      background-color: #e3f2fd;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-top: 12px;
+    }
+    
+    .template-tip-icon {
+      color: #2979ff;
+      margin-right: 8px;
+      font-size: 16px;
+    }
+    
+    .template-tip-text {
+      font-size: 12px;
+      color: #2979ff;
+      flex: 1;
+    }
+    
+    .template-download {
+      color: #2979ff;
+      text-decoration: underline;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+      <div class="navbar-back">←</div>
+      <div class="navbar-title">批量录入库存</div>
+    </div>
+    
+    <!-- 内容区域 -->
+    <div class="content-area">
+      <!-- 批量导入选项 -->
+      <div class="import-options">
+        <div class="section-title">批量导入方式</div>
+        
+        <div class="import-btn primary">
+          <span class="import-icon">📁</span>
+          <span>导入Excel表格</span>
+        </div>
+        
+        <div class="template-tip">
+          <span class="template-tip-icon">ℹ️</span>
+          <span class="template-tip-text">请按照模板格式填写数据</span>
+          <span class="template-download">下载模板</span>
+        </div>
+        
+        <div class="import-tip">
+          支持.xlsx、.xls、.csv格式文件，文件大小不超过5MB
+        </div>
+      </div>
+      
+      <!-- 扫码录入 -->
+      <div class="scan-section">
+        <div class="scan-icon">📷</div>
+        <div class="scan-text">
+          点击扫描商品条码<br>
+          自动添加商品到列表
+        </div>
+      </div>
+      
+      <!-- 手动录入 -->
+      <div class="manual-input">
+        <div class="section-title">手动录入</div>
+        
+        <div class="table-header">
+          <div class="table-cell col-select"></div>
+          <div class="table-cell col-product">商品</div>
+          <div class="table-cell col-quantity">数量</div>
+          <div class="table-cell col-type">类型</div>
+          <div class="table-cell col-action"></div>
+        </div>
+        
+        <!-- 表格行 -->
+        <div class="table-row">
+          <div class="table-cell col-select">
+            <div class="checkbox checked">✓</div>
+          </div>
+          <div class="table-cell col-product">
+            <input type="text" class="input-field" placeholder="选择商品">
+          </div>
+          <div class="table-cell col-quantity">
+            <div class="quantity-stepper">
+              <div class="quantity-btn">-</div>
+              <input type="text" class="quantity-input" value="1">
+              <div class="quantity-btn">+</div>
+            </div>
+          </div>
+          <div class="table-cell col-type">
+            <select class="input-field">
+              <option>未开封</option>
+              <option>已开封</option>
+            </select>
+          </div>
+          <div class="table-cell col-action">
+            <div class="delete-btn">×</div>
+          </div>
+        </div>
+        
+        <div class="table-row">
+          <div class="table-cell col-select">
+            <div class="checkbox checked">✓</div>
+          </div>
+          <div class="table-cell col-product">
+            <input type="text" class="input-field" placeholder="选择商品">
+          </div>
+          <div class="table-cell col-quantity">
+            <div class="quantity-stepper">
+              <div class="quantity-btn">-</div>
+              <input type="text" class="quantity-input" value="1">
+              <div class="quantity-btn">+</div>
+            </div>
+          </div>
+          <div class="table-cell col-type">
+            <select class="input-field">
+              <option>未开封</option>
+              <option>已开封</option>
+            </select>
+          </div>
+          <div class="table-cell col-action">
+            <div class="delete-btn">×</div>
+          </div>
+        </div>
+        
+        <div class="table-row">
+          <div class="table-cell col-select">
+            <div class="checkbox">✓</div>
+          </div>
+          <div class="table-cell col-product">
+            <input type="text" class="input-field" placeholder="选择商品">
+          </div>
+          <div class="table-cell col-quantity">
+            <div class="quantity-stepper">
+              <div class="quantity-btn">-</div>
+              <input type="text" class="quantity-input" value="1">
+              <div class="quantity-btn">+</div>
+            </div>
+          </div>
+          <div class="table-cell col-type">
+            <select class="input-field">
+              <option>未开封</option>
+              <option>已开封</option>
+            </select>
+          </div>
+          <div class="table-cell col-action">
+            <div class="delete-btn">×</div>
+          </div>
+        </div>
+        
+        <!-- 添加行按钮 -->
+        <div class="add-row">
+          <span class="add-row-icon">+</span>
+          <span>添加商品</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 底部提交按钮 -->
+    <div class="bottom-bar">
+      <div class="submit-btn">批量入库（3件商品）</div>
+    </div>
+    
+    <!-- 商品选择弹窗 (默认隐藏，这里为了展示设计) -->
+    <div class="popup" style="display: none;">
+      <div class="popup-content">
+        <div class="popup-header">选择商品</div>
+        <div class="popup-body">
+          <div class="product-select">
+            <div class="product-item">
+              <div class="product-item-image"></div>
+              <div class="product-item-info">
+                <div class="product-item-name">啤酒 A</div>
+                <div class="product-item-price">¥25.00</div>
+              </div>
+            </div>
+            
+            <div class="product-item">
+              <div class="product-item-image"></div>
+              <div class="product-item-info">
+                <div class="product-item-name">红酒 B</div>
+                <div class="product-item-price">¥128.00</div>
+              </div>
+            </div>
+            
+            <div class="product-item">
+              <div class="product-item-image"></div>
+              <div class="product-item-info">
+                <div class="product-item-name">威士忌 C</div>
+                <div class="product-item-price">¥358.00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="popup-footer">
+          <div class="popup-btn cancel">取消</div>
+          <div class="popup-btn confirm">确定</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html> 

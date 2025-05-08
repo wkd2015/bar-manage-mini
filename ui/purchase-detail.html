@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>采购订单详情</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    body {
+      background-color: #f6f6f6;
+      color: #333;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden; /* 禁止body滚动 */
+    }
+    
+    .container {
+      max-width: 414px;
+      margin: 0 auto;
+      background-color: #f6f6f6;
+      height: 100vh; /* 固定高度 */
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* 禁止整体容器滚动 */
+    }
+    
+    /* 顶部导航栏 */
+    .navbar {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      background-color: #1565c0;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 16px;
+      width: 100%;
+      flex-shrink: 0; /* 防止收缩 */
+    }
+    
+    .navbar-back {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    
+    .navbar-title {
+      font-size: 17px;
+      font-weight: 500;
+      flex: 1;
+      text-align: center;
+      margin-right: 28px;
+    }
+    
+    /* 顶部状态区域 */
+    .order-status-header {
+      background: linear-gradient(180deg, #1565c0 0%, #1565c0 10%, #2979ff 100%);
+      color: white;
+      padding: 12px 16px 20px;
+      width: 100%;
+      margin-top: -1px; /* 消除navbar和header之间的分隔线 */
+    }
+    
+    .order-no {
+      font-size: 13px;
+      opacity: 0.85;
+      margin-bottom: 8px;
+    }
+    
+    .status-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .main-status {
+      font-size: 22px;
+      font-weight: 600;
+    }
+    
+    .status-actions {
+      display: flex;
+    }
+    
+    .status-action-btn {
+      padding: 6px 12px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 13px;
+      margin-left: 8px;
+    }
+    
+    /* 内容区域 */
+    .content-area {
+      width: 100%;
+      background: linear-gradient(180deg, #f0f7ff 0%, #f8fbff 50%, #ffffff 100%);
+      border-radius: 16px 16px 0 0;
+      margin-top: -16px;
+      padding: 16px 0 0;
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    
+    .content-area::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    
+    /* 订单流程进度 */
+    .order-progress {
+      margin: 0 16px 15px;
+      padding: 16px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .progress-title {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: #333;
+    }
+    
+    .progress-steps {
+      display: flex;
+      position: relative;
+      padding-bottom: 5px;
+    }
+    
+    .progress-line {
+      position: absolute;
+      top: 12px;
+      left: 20px;
+      right: 20px;
+      height: 2px;
+      background-color: #e0e0e0;
+      z-index: 1;
+    }
+    
+    .progress-line-active {
+      position: absolute;
+      top: 12px;
+      left: 20px;
+      width: 60%; /* 根据实际进度调整 */
+      height: 2px;
+      background-color: #2979ff;
+      z-index: 2;
+    }
+    
+    .progress-step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 3;
+    }
+    
+    .step-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    
+    .step-dot.active {
+      border-color: #2979ff;
+      background-color: #2979ff;
+      color: white;
+    }
+    
+    .step-dot.completed {
+      border-color: #2979ff;
+      background-color: #2979ff;
+      color: white;
+    }
+    
+    .step-label {
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+    }
+    
+    .step-label.active {
+      color: #2979ff;
+      font-weight: 500;
+    }
+    
+    .step-date {
+      font-size: 10px;
+      color: #bbb;
+      margin-top: 2px;
+    }
+    
+    /* 供应商信息卡片 */
+    .info-section {
+      margin: 0 16px 15px;
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .section-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .section-title-link {
+      font-size: 13px;
+      color: #2979ff;
+      font-weight: normal;
+    }
+    
+    .info-row {
+      display: flex;
+      margin-bottom: 8px;
+    }
+    
+    .info-label {
+      width: 80px;
+      color: #999;
+      flex-shrink: 0;
+    }
+    
+    .info-value {
+      flex: 1;
+      color: #333;
+    }
+    
+    /* 商品列表区域限高滚动 */
+    .goods-list {
+      margin-bottom: 8px;
+      max-height: 230px; /* 限制最大高度，显示约3个商品 */
+      overflow-y: auto;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    
+    .goods-list::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    
+    .goods-item {
+      display: flex;
+      padding: 10px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    
+    .goods-item:last-child {
+      border-bottom: none;
+    }
+    
+    .goods-thumbnail {
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      background-color: #f5f5f5;
+      overflow: hidden;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    
+    .goods-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .goods-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .goods-name {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .goods-price {
+      font-size: 13px;
+      color: #f44336;
+    }
+    
+    .goods-quantity {
+      font-size: 13px;
+      color: #999;
+      text-align: right;
+      margin-top: 4px;
+    }
+    
+    .goods-amount {
+      width: 80px;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    
+    /* 订单金额信息 */
+    .amount-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    
+    .amount-row:last-child {
+      margin-bottom: 0;
+      padding-top: 8px;
+      border-top: 1px dashed #eee;
+    }
+    
+    .amount-label {
+      color: #999;
+    }
+    
+    .amount-value {
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .amount-total {
+      color: #f44336;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    
+    /* 附件列表 */
+    .attachment-list {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    
+    .attachment-item {
+      width: calc(33.33% - 8px);
+      margin-right: 8px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    
+    .attachment-item:nth-child(3n) {
+      margin-right: 0;
+    }
+    
+    .attachment-thumbnail {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      background-color: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .attachment-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .attachment-type {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-size: 10px;
+      padding: 2px 0;
+      text-align: center;
+      border-radius: 0 0 8px 8px;
+    }
+    
+    /* 按钮区域 */
+    .bottom-actions {
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      background-color: #fff;
+      box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .secondary-action {
+      width: 30%;
+      height: 44px;
+      border-radius: 22px;
+      border: 1px solid #2979ff;
+      color: #2979ff;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+    
+    .primary-action {
+      width: 65%;
+      height: 44px;
+      border-radius: 22px;
+      background-color: #2979ff;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+    
+    /* 标签样式 */
+    .status-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+    
+    .tag-pending {
+      background-color: #fff8e1;
+      color: #ffa000;
+    }
+    
+    .tag-approved {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .tag-rejected {
+      background-color: #ffebee;
+      color: #d32f2f;
+    }
+    
+    .tag-waiting {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+    
+    /* 底部安全边距 */
+    .safe-area-bottom {
+      height: 20px;
+    }
+    
+    /* 查看全部按钮 */
+    .view-all-btn {
+      text-align: center;
+      padding: 10px 0;
+      color: #2979ff;
+      font-size: 13px;
+      border-top: 1px dashed #eee;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+      <div class="navbar-back">←</div>
+      <div class="navbar-title">采购订单详情</div>
+    </div>
+    
+    <!-- 顶部状态区域 -->
+    <div class="order-status-header">
+      <div class="order-no">订单编号：PO20240615001</div>
+      <div class="status-info">
+        <div class="main-status">待收货</div>
+        <div class="status-actions">
+          <div class="status-action-btn">联系供应商</div>
+          <div class="status-action-btn">查看物流</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 主要内容区域 -->
+    <div class="content-area">
+      <!-- 订单流程进度 -->
+      <div class="order-progress">
+        <div class="progress-title">订单进度</div>
+        <div class="progress-steps">
+          <div class="progress-line"></div>
+          <div class="progress-line-active"></div>
+          
+          <div class="progress-step">
+            <div class="step-dot completed">✓</div>
+            <div class="step-label">下单</div>
+            <div class="step-date">06-15 15:30</div>
+          </div>
+          
+          <div class="progress-step">
+            <div class="step-dot completed">✓</div>
+            <div class="step-label">付款</div>
+            <div class="step-date">06-15 16:20</div>
+          </div>
+          
+          <div class="progress-step">
+            <div class="step-dot completed">✓</div>
+            <div class="step-label">发货</div>
+            <div class="step-date">06-16 10:15</div>
+          </div>
+          
+          <div class="progress-step">
+            <div class="step-dot active">4</div>
+            <div class="step-label active">收货</div>
+            <div class="step-date">待完成</div>
+          </div>
+          
+          <div class="progress-step">
+            <div class="step-dot">5</div>
+            <div class="step-label">入库</div>
+            <div class="step-date">待完成</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 供应商信息 -->
+      <div class="info-section">
+        <div class="section-title">
+          供应商信息
+          <span class="section-title-link">查看供应商主页</span>
+        </div>
+        <div class="info-row">
+          <div class="info-label">供应商：</div>
+          <div class="info-value">酒类直供专营店</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">联系人：</div>
+          <div class="info-value">张经理</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">联系电话：</div>
+          <div class="info-value">13812345678</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">电子邮箱：</div>
+          <div class="info-value">supplier@example.com</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">地址：</div>
+          <div class="info-value">上海市浦东新区张江高科技园区科苑路88号</div>
+        </div>
+      </div>
+      
+      <!-- 审批信息 -->
+      <div class="info-section">
+        <div class="section-title">审批信息</div>
+        <div class="info-row">
+          <div class="info-label">采购审批：</div>
+          <div class="info-value">已通过<span class="status-tag tag-approved">已批准</span></div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">财务审批：</div>
+          <div class="info-value">已通过<span class="status-tag tag-approved">已批准</span></div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">经理审批：</div>
+          <div class="info-value">已通过<span class="status-tag tag-approved">已批准</span></div>
+        </div>
+      </div>
+      
+      <!-- 商品列表 -->
+      <div class="info-section">
+        <div class="section-title">商品清单</div>
+        <div class="goods-list">
+          <!-- 商品1 -->
+          <div class="goods-item">
+            <div class="goods-thumbnail">
+              <img src="https://via.placeholder.com/60" alt="商品图片">
+            </div>
+            <div class="goods-info">
+              <div class="goods-name">轩尼诗XO</div>
+              <div class="goods-price">¥1280.00/瓶</div>
+            </div>
+            <div class="goods-amount">
+              <div class="goods-quantity">×2</div>
+              <div class="amount-value">¥2560.00</div>
+            </div>
+          </div>
+          
+          <!-- 商品2 -->
+          <div class="goods-item">
+            <div class="goods-thumbnail">
+              <img src="https://via.placeholder.com/60" alt="商品图片">
+            </div>
+            <div class="goods-info">
+              <div class="goods-name">马爹利蓝带</div>
+              <div class="goods-price">¥980.00/瓶</div>
+            </div>
+            <div class="goods-amount">
+              <div class="goods-quantity">×3</div>
+              <div class="amount-value">¥2940.00</div>
+            </div>
+          </div>
+          
+          <!-- 商品3 -->
+          <div class="goods-item">
+            <div class="goods-thumbnail">
+              <img src="https://via.placeholder.com/60" alt="商品图片">
+            </div>
+            <div class="goods-info">
+              <div class="goods-name">绝对伏特加</div>
+              <div class="goods-price">¥120.00/瓶</div>
+            </div>
+            <div class="goods-amount">
+              <div class="goods-quantity">×5</div>
+              <div class="amount-value">¥600.00</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 金额信息 -->
+        <div class="amount-row">
+          <div class="amount-label">商品总额</div>
+          <div class="amount-value">¥6100.00</div>
+        </div>
+        <div class="amount-row">
+          <div class="amount-label">运费</div>
+          <div class="amount-value">¥0.00</div>
+        </div>
+        <div class="amount-row">
+          <div class="amount-label">总计</div>
+          <div class="amount-total">¥6100.00</div>
+        </div>
+      </div>
+      
+      <!-- 结算信息 -->
+      <div class="info-section">
+        <div class="section-title">结算信息</div>
+        <div class="info-row">
+          <div class="info-label">支付方式：</div>
+          <div class="info-value">银行转账</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">银行账户：</div>
+          <div class="info-value">6225 **** **** 8901</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">开户行：</div>
+          <div class="info-value">中国建设银行上海张江支行</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">支付状态：</div>
+          <div class="info-value">已支付<span class="status-tag tag-approved">已完成</span></div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">支付时间：</div>
+          <div class="info-value">2024-06-15 16:20:35</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">结算状态：</div>
+          <div class="info-value">已结算<span class="status-tag tag-approved">已完成</span></div>
+        </div>
+      </div>
+      
+      <!-- 附件信息 -->
+      <div class="info-section">
+        <div class="section-title">
+          相关附件
+          <span class="section-title-link">全部上传</span>
+        </div>
+        <div class="attachment-list">
+          <!-- 附件1 -->
+          <div class="attachment-item">
+            <div class="attachment-thumbnail">
+              <img src="https://via.placeholder.com/80" alt="附件缩略图">
+            </div>
+            <div class="attachment-type">转账凭证</div>
+          </div>
+          
+          <!-- 附件2 -->
+          <div class="attachment-item">
+            <div class="attachment-thumbnail">
+              <img src="https://via.placeholder.com/80" alt="附件缩略图">
+            </div>
+            <div class="attachment-type">送货单</div>
+          </div>
+          
+          <!-- 附件3 -->
+          <div class="attachment-item">
+            <div class="attachment-thumbnail">
+              <img src="https://via.placeholder.com/80" alt="附件缩略图">
+            </div>
+            <div class="attachment-type">收据</div>
+          </div>
+          
+          <!-- 附件4 -->
+          <div class="attachment-item">
+            <div class="attachment-thumbnail">
+              <img src="https://via.placeholder.com/80" alt="附件缩略图">
+            </div>
+            <div class="attachment-type">其他文件</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 时间信息 -->
+      <div class="info-section">
+        <div class="section-title">订单时间</div>
+        <div class="info-row">
+          <div class="info-label">创建时间：</div>
+          <div class="info-value">2024-06-15 15:30:12</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">支付时间：</div>
+          <div class="info-value">2024-06-15 16:20:35</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">发货时间：</div>
+          <div class="info-value">2024-06-16 10:15:48</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">预计到达：</div>
+          <div class="info-value">2024-06-18</div>
+        </div>
+      </div>
+      
+      <!-- 底部安全区域 -->
+      <div class="safe-area-bottom"></div>
+    </div>
+    
+    <!-- 底部操作按钮 -->
+    <div class="bottom-actions">
+      <div class="secondary-action">修改订单</div>
+      <div class="primary-action">确认收货</div>
+    </div>
+  </div>
+</body>
+</html> 

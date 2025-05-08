@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>酒吧管理小程序首页</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    body {
+      background-color: #f6f6f6;
+      color: #333;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden;  /* 禁止body滚动 */
+    }
+    
+    .container {
+      max-width: 414px;
+      margin: 0 auto;
+      background-color: #f6f6f6;
+      height: 100vh;  /* 固定高度 */
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;  /* 禁止整体容器滚动 */
+    }
+    
+    /* 顶部区域 - 数据概览 */
+    .header {
+      background: linear-gradient(180deg, #1565c0 0%, #1565c0 10%, #2979ff 100%);
+      color: white;
+      padding: 0 16px 30px;
+      width: 100%;
+      margin-top: -1px;
+    }
+    
+    /* 顶部导航栏 */
+    .navbar {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      background-color: #1565c0;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0 16px;
+      width: 100%;
+    }
+    
+    .navbar-title {
+      font-size: 17px;
+      font-weight: 500;
+      flex: 1;
+      text-align: center;
+    }
+    
+    .shop-info {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin: 0 0 15px 0;
+    }
+    
+    .shop-name {
+      font-size: 22px;
+      font-weight: bold;
+    }
+    
+    .data-overview {
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0 20px;
+    }
+    
+    .data-item {
+      flex: 1;
+      text-align: center;
+      padding: 8px 0;
+      position: relative;
+    }
+    
+    .data-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 25%;
+      height: 50%;
+      width: 1px;
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .data-value {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    
+    .data-label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    /* 金刚区 - 主要功能入口 */
+    .quick-access-primary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 0 16px;
+    }
+    
+    .quick-access-item-primary {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .quick-access-icon-primary {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      font-size: 18px;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: bold;
+    }
+    
+    .quick-access-name-primary {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    /* 内容区域 */
+    .content-area {
+      width: 100%;
+      background: linear-gradient(180deg, #f0f7ff 0%, #f8fbff 50%, #ffffff 100%);
+      border-radius: 16px 16px 0 0;
+      margin-top: -20px;
+      padding-top: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;  /* 防止整体滚动 */
+    }
+    
+    /* 次要功能入口 */
+    .quick-access-secondary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 12px 16px 16px;
+      flex-shrink: 0;  /* 防止收缩 */
+    }
+    
+    .quick-access-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    
+    .quick-access-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+    
+    .icon-1 { background-color: #e3f2fd; color: #1976d2; }
+    .icon-2 { background-color: #e8f5e9; color: #2e7d32; }
+    .icon-3 { background-color: #fff3e0; color: #e65100; }
+    .icon-4 { background-color: #f3e5f5; color: #7b1fa2; }
+    .icon-5 { background-color: #e0f7fa; color: #0097a7; }
+    .icon-6 { background-color: #fff8e1; color: #ffa000; }
+    .icon-7 { background-color: #f1f8e9; color: #558b2f; }
+    .icon-8 { background-color: #e8eaf6; color: #3949ab; }
+    
+    .quick-access-name {
+      font-size: 11px;
+      color: #666;
+    }
+    
+    /* 任务列表 */
+    .task-list {
+      margin: 0 12px;
+      background-color: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+      flex-shrink: 0;  /* 防止收缩 */
+    }
+    
+    .task-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .view-more {
+      font-size: 12px;
+      color: #2979ff;
+    }
+    
+    .task-items-container {
+      flex: 1;
+      overflow-y: auto;
+      height: 100%;
+      /* 隐藏滚动条 */
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    
+    .task-items-container::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    
+    .task-item {
+      display: flex;
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .task-item:last-child {
+      border-bottom: none;
+    }
+    
+    .task-item-left {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      background-color: #f5f5f5;
+      margin-right: 12px;
+      overflow: hidden;
+    }
+    
+    .task-priority {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 20px 20px 0 0;
+      border-color: #ff5252 transparent transparent transparent;
+    }
+    
+    .task-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .task-name {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .task-desc {
+      font-size: 12px;
+      color: #999;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    
+    .task-date {
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .task-tag {
+      font-size: 10px;
+      color: #2979ff;
+      background-color: #e3f2fd;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 6px;
+    }
+    
+    .task-tag.urgent {
+      color: #d32f2f;
+      background-color: #ffebee;
+    }
+    
+    .task-tag.normal {
+      color: #388e3c;
+      background-color: #e8f5e9;
+    }
+    
+    .task-tag.low {
+      color: #ffa000;
+      background-color: #fff8e1;
+    }
+    
+    /* 底部导航栏 */
+    .tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background-color: #fff;
+      display: flex;
+      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+      max-width: 414px;
+      margin: 0 auto;
+    }
+    
+    .tab-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #999;
+    }
+    
+    .tab-item.active {
+      color: #2979ff;
+    }
+    
+    .tab-icon {
+      margin-bottom: 3px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+      <div class="navbar-title">首页</div>
+    </div>
+    
+    <!-- 顶部区域 - 数据概览 -->
+    <div class="header">
+      <div class="shop-info">
+        <div class="shop-name">酒吧名称</div>
+      </div>
+      
+      <div class="data-overview">
+        <div class="data-item">
+          <div class="data-value">248</div>
+          <div class="data-label">库存总数</div>
+        </div>
+        <div class="data-item">
+          <div class="data-value">56</div>
+          <div class="data-label">已开封</div>
+        </div>
+        <div class="data-item">
+          <div class="data-value">¥4,235</div>
+          <div class="data-label">本月销售</div>
+        </div>
+      </div>
+      
+      <!-- 第一层金刚位（核心功能）移到顶部蓝色区域 -->
+      <div class="quick-access-primary">
+        <div class="quick-access-item-primary">
+          <div class="quick-access-icon-primary">库</div>
+          <div class="quick-access-name-primary">库存管理</div>
+        </div>
+        <div class="quick-access-item-primary">
+          <div class="quick-access-icon-primary">商</div>
+          <div class="quick-access-name-primary">商品管理</div>
+        </div>
+        <div class="quick-access-item-primary">
+          <div class="quick-access-icon-primary">采</div>
+          <div class="quick-access-name-primary">采购管理</div>
+        </div>
+        <div class="quick-access-item-primary">
+          <div class="quick-access-icon-primary">任</div>
+          <div class="quick-access-name-primary">任务管理</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 内容区域：整合第二层金刚位和任务列表 -->
+    <div class="content-area">
+      <!-- 次要功能 - 第二层 -->
+      <div class="quick-access-secondary">
+        <div class="quick-access-item">
+          <div class="quick-access-icon icon-5">统</div>
+          <div class="quick-access-name">数据统计</div>
+        </div>
+        <div class="quick-access-item">
+          <div class="quick-access-icon icon-6">供</div>
+          <div class="quick-access-name">供应商</div>
+        </div>
+        <div class="quick-access-item">
+          <div class="quick-access-icon icon-7">店</div>
+          <div class="quick-access-name">店铺管理</div>
+        </div>
+        <div class="quick-access-item">
+          <div class="quick-access-icon icon-8">员</div>
+          <div class="quick-access-name">员工管理</div>
+        </div>
+      </div>
+      
+      <!-- 任务列表 -->
+      <div class="task-list">
+        <div class="task-header">
+          <div class="task-title">任务</div>
+          <div class="view-more">查看更多 ></div>
+        </div>
+        
+        <!-- 任务项目 -->
+        <div class="task-items-container">
+          <div class="task-item">
+            <div class="task-item-left">
+              <div class="task-priority"></div>
+            </div>
+            <div class="task-info">
+              <div>
+                <div class="task-name">月末库存盘点</div>
+                <div class="task-desc">对所有酒水进行盘点并记录</div>
+              </div>
+              <div>
+                <span class="task-tag urgent">紧急</span>
+                <span class="task-date">截止日期: 2023-06-30</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="task-item">
+            <div class="task-item-left"></div>
+            <div class="task-info">
+              <div>
+                <div class="task-name">新品入库确认</div>
+                <div class="task-desc">验收新进进口威士忌并入库</div>
+              </div>
+              <div>
+                <span class="task-tag normal">普通</span>
+                <span class="task-date">截止日期: 2023-06-15</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="task-item">
+            <div class="task-item-left"></div>
+            <div class="task-info">
+              <div>
+                <div class="task-name">商品价格调整</div>
+                <div class="task-desc">根据最新成本调整酒水价格</div>
+              </div>
+              <div>
+                <span class="task-tag normal">普通</span>
+                <span class="task-date">截止日期: 2023-06-20</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="task-item">
+            <div class="task-item-left"></div>
+            <div class="task-info">
+              <div>
+                <div class="task-name">供应商评估</div>
+                <div class="task-desc">对现有供应商进行季度评估</div>
+              </div>
+              <div>
+                <span class="task-tag low">低优先级</span>
+                <span class="task-date">截止日期: 2023-07-10</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 添加更多任务项以展示滚动效果 -->
+          <div class="task-item">
+            <div class="task-item-left"></div>
+            <div class="task-info">
+              <div>
+                <div class="task-name">酒水促销活动策划</div>
+                <div class="task-desc">策划夏季特饮促销活动</div>
+              </div>
+              <div>
+                <span class="task-tag normal">普通</span>
+                <span class="task-date">截止日期: 2023-07-15</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="task-item">
+            <div class="task-item-left"></div>
+            <div class="task-info">
+              <div>
+                <div class="task-name">员工培训计划</div>
+                <div class="task-desc">为新员工安排鸡尾酒调制培训</div>
+              </div>
+              <div>
+                <span class="task-tag normal">普通</span>
+                <span class="task-date">截止日期: 2023-07-18</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="task-item">
+            <div class="task-item-left">
+              <div class="task-priority"></div>
+            </div>
+            <div class="task-info">
+              <div>
+                <div class="task-name">清点低库存商品</div>
+                <div class="task-desc">检查并补充库存低于预警值的商品</div>
+              </div>
+              <div>
+                <span class="task-tag urgent">紧急</span>
+                <span class="task-date">截止日期: 2023-07-05</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="task-item">
+            <div class="task-item-left"></div>
+            <div class="task-info">
+              <div>
+                <div class="task-name">周末活动准备</div>
+                <div class="task-desc">为周末live表演准备特殊酒水菜单</div>
+              </div>
+              <div>
+                <span class="task-tag normal">普通</span>
+                <span class="task-date">截止日期: 2023-07-07</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="task-item">
+            <div class="task-item-left"></div>
+            <div class="task-info">
+              <div>
+                <div class="task-name">更新酒水价目表</div>
+                <div class="task-desc">根据最新成本更新酒水价格</div>
+              </div>
+              <div>
+                <span class="task-tag normal">普通</span>
+                <span class="task-date">截止日期: 2023-07-12</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="task-item">
+            <div class="task-item-left"></div>
+            <div class="task-info">
+              <div>
+                <div class="task-name">设备维护</div>
+                <div class="task-desc">安排冰箱和制冰机的定期维护</div>
+              </div>
+              <div>
+                <span class="task-tag low">低优先级</span>
+                <span class="task-date">截止日期: 2023-07-25</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 底部导航栏 -->
+    <div class="tabbar">
+      <div class="tab-item active">
+        <div class="tab-icon">首</div>
+        <div>首页</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">库</div>
+        <div>库存</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">商</div>
+        <div>商品</div>
+      </div>
+      <div class="tab-item">
+        <div class="tab-icon">我</div>
+        <div>我的</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

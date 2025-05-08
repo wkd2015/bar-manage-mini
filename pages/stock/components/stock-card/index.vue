@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, ref, defineEmits, computed } from "vue";
+import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import { InventoryService } from "@/services/inventory";
 
