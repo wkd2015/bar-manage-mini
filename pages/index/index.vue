@@ -25,8 +25,8 @@ const initShopInfo = async () => {
   }
 };
 
-const onGridNavClick = (item) => {
-  uni.navigateTo({ url: `/pages/${item}/index` });
+const onGridNavClick = (url) => {
+  uni.navigateTo({ url });
 };
 
 watch(
