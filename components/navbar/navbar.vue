@@ -20,21 +20,12 @@ const props = defineProps({
 	},
 	opacity: {
 		type: Number,
-		default: 0
+		default: 1
 	},
 	eleColor: {
 		type: String,
-		default: '#151515'
-	},
-	navBackIcon: {
-		type: String,
-		default: '../static/imgs/nav-back.png'
+		default: '#ffffff'
 	}
-})
-const navbarBackIcon = computed(() => {
-	// TODO: fix：navBackIcon未定义
-	// eslint-disable-next-line
-	return props.navBackIcon ? props.navBackIcon : navBackIcon
 })
 const navbarInfo = computed(() => store.getters.navbarInfo)
 </script>
@@ -44,12 +35,9 @@ const navbarInfo = computed(() => store.getters.navbarInfo)
 		class="navbar"
 		:style="`height: ${navbarInfo.barHeight}px; padding-top: ${
 			navbarInfo.statusBarHeight
-		}px; background: rgba(255, 255, 255, ${opacity}); ${
-			opacity === 1 && 'box-shadow: 0px 1px 13.4px 0px rgba(0, 0, 0, 0.1);'
-		}`"
+		}px; background: rgba(21, 101, 192, ${opacity});`"
 	>
-		<!-- TODO: fix: 现阶段不支持传入颜色显示svg，右上角图标需要改成可配置 -->
-		<uni-icons type="left" size="24" class="navbar-back" @click="onNavClick" v-if="showNavBack" />
+		<image src="/static/imgs/nav-back.png" class="navbar-back" @click="onNavClick" v-if="showNavBack" />
 		<view class="navbar-title" :style="`height: ${navbarInfo.navHeight}px; color: ${eleColor}`">{{
 			title
 		}}</view>
@@ -70,10 +58,12 @@ const navbarInfo = computed(() => store.getters.navbarInfo)
 	&-back {
 		padding-left: 16px;
 		position: fixed;
+		width: 24px;
+		height: 24px;
 	}
 
 	&-title {
-		font-size: 16px;
+		font-size: 18px;
 		font-weight: 500;
 		display: flex;
 		align-items: center;
