@@ -345,16 +345,17 @@ const onStockOpenConfirm = async () => {
 }
 
 .stock-card {
-  display: flex;
-  flex-direction: column;
+  border-radius: 12px;
   background-color: #fff;
-  padding: 16px 10px;
-  border-bottom: 0.5px solid #eee;
-  gap: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin: 0 12px 12px;
 }
 
 .stock-card-top {
   display: flex;
+  padding: 16px 10px;
+  border-bottom: 0.5px solid #f5f5f5;
 }
 
 .stock-card-thumbnail {
@@ -391,6 +392,7 @@ const onStockOpenConfirm = async () => {
 .stock-card-bottom {
   display: flex;
   justify-content: flex-end;
+  padding: 10px 16px;
   gap: 10px;
 }
 
