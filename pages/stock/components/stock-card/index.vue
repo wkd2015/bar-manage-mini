@@ -102,12 +102,12 @@ const onStockOpenConfirm = async () => {
   <view class="stock-card">
     <view class="stock-card-top">
       <view class="stock-card-thumbnail">
-        <image class="stock-card-thumbnail-image" :src="stockInfo.productInfo?.imageUrl" />
+        <image class="stock-card-thumbnail-image" :src="stockInfo.productInfo?.imageUrl || '/static/imgs/goods-default.jpeg'" />
       </view>
       <view class="stock-card-info">
         <view class="stock-card-info-goods">
           <view class="stock-card-info-name"
-            >商品名称：{{ stockInfo.productInfo?.name }}</view
+            >{{ stockInfo.productInfo?.name }}</view
           >
           <view class="stock-card-info-price"
             >零售价格: ￥{{ stockInfo.productInfo?.estimatedPrice }}</view
@@ -117,16 +117,8 @@ const onStockOpenConfirm = async () => {
           >
         </view>
         <view class="stock-card-info-stock">
-          <uni-tag
-            :text="`库存：${stockInfo.totalQuantity}`"
-            size="small"
-            type="primary"
-          />
-          <uni-tag
-            :text="`开封：${stockInfo.usedQuantity}`"
-            size="small"
-            type="success"
-          />
+          <view class="stock-tag-primary">库存：{{ stockInfo.totalQuantity }}</view>
+          <view class="stock-tag-success">开封：{{ stockInfo.usedQuantity }}</view>
         </view>
       </view>
     </view>
@@ -359,8 +351,8 @@ const onStockOpenConfirm = async () => {
 }
 
 .stock-card-thumbnail {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   border-radius: 6px;
   margin-right: 12px;
   overflow: hidden;
@@ -381,12 +373,48 @@ const onStockOpenConfirm = async () => {
 
 .stock-card-info-goods {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stock-card-info-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.stock-card-info-price {
+  font-size: 14px;
+  color: #666;
+}
+
+.stock-card-info-category {
+  font-size: 12px;
+  color: #999;
 }
 
 .stock-card-info-stock {
   display: flex;
   gap: 10px;
-  padding-bottom: 5px;
+  padding-top: 8px;
+}
+
+.stock-tag-primary {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.stock-tag-success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.stock-tag-primary,
+.stock-tag-success {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
 }
 
 .stock-card-bottom {

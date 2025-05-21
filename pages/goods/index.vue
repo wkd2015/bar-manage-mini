@@ -87,7 +87,7 @@ onShow(async () => {
 
 <template>
   <view class="container" :style="`padding-top: ${navbarInfo.barHeight}px;`">
-    <navbar title="商品管理" :opacity="1" showNavBack :onNavClick="onNavClick"></navbar>
+    <navbar title="商品管理" showNavBack :onNavClick="onNavClick"></navbar>
     <view class="goods-list">
       <scroll-view
         scroll-y
